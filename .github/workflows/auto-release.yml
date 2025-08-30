@@ -1,0 +1,217 @@
+name: Auto Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prepatch
+          - preminor
+          - premajor
+      prerelease_tag:
+        description: 'Prerelease tag (beta, rc, alpha)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  prepare-release:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.version.outputs.new_version }}
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Configure Git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Install cargo-edit
+      run: cargo install cargo-edit
+
+    - name: Get current version
+      id: current_version
+      run: |
+        CURRENT_VERSION=$(grep "^version" Cargo.toml | head -1 | cut -d '"' -f 2)
+        echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+        echo "Current version: $CURRENT_VERSION"
+
+    - name: Calculate new version
+      id: version
+      run: |
+        CURRENT_VERSION="${{ steps.current_version.outputs.current_version }}"
+        VERSION_TYPE="${{ github.event.inputs.version_type }}"
+        PRERELEASE_TAG="${{ github.event.inputs.prerelease_tag }}"
+        
+        # Parse current version
+        IFS='.' read -r major minor patch <<< "${CURRENT_VERSION%-*}"
+        
+        # Calculate new version based on type
+        case "$VERSION_TYPE" in
+          major)
+            major=$((major + 1))
+            minor=0
+            patch=0
+            ;;
+          minor)
+            minor=$((minor + 1))
+            patch=0
+            ;;
+          patch)
+            patch=$((patch + 1))
+            ;;
+          premajor)
+            major=$((major + 1))
+            minor=0
+            patch=0
+            PRERELEASE_TAG="${PRERELEASE_TAG:-beta}.1"
+            ;;
+          preminor)
+            minor=$((minor + 1))
+            patch=0
+            PRERELEASE_TAG="${PRERELEASE_TAG:-beta}.1"
+            ;;
+          prepatch)
+            patch=$((patch + 1))
+            PRERELEASE_TAG="${PRERELEASE_TAG:-beta}.1"
+            ;;
+        esac
+        
+        # Construct new version
+        NEW_VERSION="$major.$minor.$patch"
+        if [ -n "$PRERELEASE_TAG" ]; then
+          NEW_VERSION="$NEW_VERSION-$PRERELEASE_TAG"
+        fi
+        
+        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "New version: $NEW_VERSION"
+
+    - name: Update version in Cargo.toml
+      run: |
+        cargo set-version ${{ steps.version.outputs.new_version }}
+        
+    - name: Update Cargo.lock
+      run: cargo update -p ollama_rust_sdk
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        NEW_VERSION="${{ steps.version.outputs.new_version }}"
+        
+        # Create changelog file
+        cat > CHANGELOG_ENTRY.md << 'EOF'
+        ## [${{ steps.version.outputs.new_version }}] - $(date +%Y-%m-%d)
+        
+        ### Added
+        EOF
+        
+        # Get commits since last tag
+        if git describe --tags --abbrev=0 HEAD^ 2>/dev/null; then
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^)
+          
+          # Categorize commits
+          git log $LAST_TAG..HEAD --pretty=format:"%s|%h" | while IFS='|' read -r message hash; do
+            if [[ $message == feat:* ]] || [[ $message == feature:* ]]; then
+              echo "- $message ($hash)" >> CHANGELOG_ENTRY.md
+            fi
+          done
+          
+          echo "" >> CHANGELOG_ENTRY.md
+          echo "### Changed" >> CHANGELOG_ENTRY.md
+          git log $LAST_TAG..HEAD --pretty=format:"%s|%h" | while IFS='|' read -r message hash; do
+            if [[ $message == chore:* ]] || [[ $message == refactor:* ]]; then
+              echo "- $message ($hash)" >> CHANGELOG_ENTRY.md
+            fi
+          done
+          
+          echo "" >> CHANGELOG_ENTRY.md
+          echo "### Fixed" >> CHANGELOG_ENTRY.md
+          git log $LAST_TAG..HEAD --pretty=format:"%s|%h" | while IFS='|' read -r message hash; do
+            if [[ $message == fix:* ]] || [[ $message == bugfix:* ]]; then
+              echo "- $message ($hash)" >> CHANGELOG_ENTRY.md
+            fi
+          done
+        else
+          echo "- Initial release" >> CHANGELOG_ENTRY.md
+        fi
+        
+        # Update CHANGELOG.md
+        if [ -f CHANGELOG.md ]; then
+          cat CHANGELOG.md >> CHANGELOG_ENTRY.md.tmp
+          mv CHANGELOG_ENTRY.md.tmp CHANGELOG.md
+          cat CHANGELOG_ENTRY.md CHANGELOG.md > CHANGELOG.md.new
+          mv CHANGELOG.md.new CHANGELOG.md
+        else
+          mv CHANGELOG_ENTRY.md CHANGELOG.md
+        fi
+
+    - name: Run tests
+      run: |
+        cargo test --all-features
+        cargo build --all-features
+        cargo doc --all-features --no-deps
+
+    - name: Commit changes
+      run: |
+        git add Cargo.toml Cargo.lock CHANGELOG.md
+        git commit -m "chore: release v${{ steps.version.outputs.new_version }}"
+        
+    - name: Create and push tag
+      run: |
+        git tag -a "v${{ steps.version.outputs.new_version }}" -m "Release v${{ steps.version.outputs.new_version }}"
+        git push origin main
+        git push origin "v${{ steps.version.outputs.new_version }}"
+
+    - name: Trigger release workflow
+      uses: actions/github-script@v7
+      with:
+        script: |
+          await github.rest.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id: 'release.yml',
+            ref: 'refs/tags/v${{ steps.version.outputs.new_version }}'
+          })
+
+    - name: Create release PR
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "chore: release v${{ steps.version.outputs.new_version }}"
+        title: "Release v${{ steps.version.outputs.new_version }}"
+        body: |
+          ## Release v${{ steps.version.outputs.new_version }}
+          
+          This PR was automatically created by the release workflow.
+          
+          ### Changes
+          See [CHANGELOG.md](CHANGELOG.md) for details.
+          
+          ### Checklist
+          - [x] Version bumped
+          - [x] Changelog updated
+          - [x] Tests pass
+          - [x] Documentation builds
+          - [ ] Ready to merge
+        branch: release/v${{ steps.version.outputs.new_version }}
+        delete-branch: true

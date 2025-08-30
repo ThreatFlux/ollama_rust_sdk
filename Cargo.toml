@@ -1,0 +1,80 @@
+[package]
+name = "ollama_rust_sdk"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A comprehensive Rust SDK for interacting with the Ollama API"
+license = "MIT"
+repository = "https://github.com/yourusername/ollama_rust_sdk"
+keywords = ["ollama", "ai", "llm", "sdk", "rust"]
+categories = ["api-bindings", "web-programming::http-client"]
+
+[lib]
+name = "ollama_rust_sdk"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ollama-cli"
+path = "src/main.rs"
+
+[dependencies]
+# HTTP client and async runtime
+reqwest = { version = "0.11", features = ["json", "stream"] }
+tokio = { version = "1.0", features = ["full"] }
+tokio-stream = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# URL parsing
+url = "2.4"
+
+# UUID generation
+uuid = { version = "1.0", features = ["v4"] }
+
+# Async streaming
+futures = "0.3"
+futures-util = "0.3"
+
+# CLI support
+clap = { version = "4.0", features = ["derive"] }
+env_logger = "0.10"
+log = "0.4"
+
+# Configuration
+config = "0.13"
+
+# Additional dependencies for examples
+chrono = { version = "0.4", features = ["serde"] }
+rand = "0.8"
+dirs = "5.0"
+
+# Optional: TLS support
+rustls = { version = "0.21", optional = true }
+
+# Optional: Tracing support
+tracing = { version = "0.1", optional = true }
+tracing-subscriber = { version = "0.3", optional = true }
+
+[dev-dependencies]
+tokio-test = "0.4"
+wiremock = "0.5"
+tempfile = "3.0"
+mockall = "0.11"
+rstest = "0.18"
+assert-json-diff = "2.0"
+pretty_assertions = "1.4"
+
+[features]
+default = ["tls"]
+tls = ["reqwest/rustls-tls", "dep:rustls"]
+tracing = ["dep:tracing", "dep:tracing-subscriber"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
