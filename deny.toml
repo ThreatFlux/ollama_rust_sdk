@@ -1,0 +1,83 @@
+# Configuration for cargo-deny
+# https://embarkstudios.github.io/cargo-deny/
+
+[graph]
+targets = [
+    { triple = "x86_64-unknown-linux-gnu" },
+    { triple = "x86_64-apple-darwin" },
+    { triple = "x86_64-pc-windows-msvc" },
+]
+all-features = true
+
+[advisories]
+version = 2
+db-path = "~/.cargo/advisory-db"
+db-urls = ["https://github.com/rustsec/advisory-db"]
+yanked = "warn"
+ignore = []
+
+[licenses]
+version = 2
+# List of explicitly allowed licenses
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-DFS-2016",
+    "CC0-1.0",
+    "Unlicense",
+    "MPL-2.0",  # Mozilla Public License is acceptable
+]
+
+# List of explicitly disallowed licenses
+deny = [
+    "GPL-2.0",
+    "GPL-3.0",
+    "AGPL-3.0",
+    # Note: LGPL is problematic for static linking but okay for dynamic
+    # We'll handle it case by case
+]
+
+copyleft = "warn"
+allow-osi-fsf-free = "neither"
+default = "deny"
+confidence-threshold = 0.8
+
+# Exceptions for specific crates
+[[licenses.exceptions]]
+# r-efi is used by some dependencies and has triple license including LGPL
+# It's only used in build scripts, not in the final binary
+allow = ["Apache-2.0 OR LGPL-2.1-or-later OR MIT"]
+name = "r-efi"
+version = "*"
+
+[[licenses.exceptions]]
+# rustls-webpki uses a custom ISC-style license
+allow = ["ISC"]
+name = "rustls-webpki"
+
+[[licenses.exceptions]]
+# ring uses a combination of licenses
+allow = ["MIT", "ISC", "OpenSSL"]
+name = "ring"
+
+[bans]
+multiple-versions = "warn"
+wildcards = "allow"
+highlight = "all"
+skip = []
+skip-tree = []
+
+# Deny specific crates
+deny = [
+    # Example: { name = "openssl", version = "*" }  # Use rustls instead
+]
+
+[sources]
+unknown-registry = "warn"
+unknown-git = "warn"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []
