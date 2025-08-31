@@ -24,10 +24,10 @@ jobs:
         ports:
           - 11434:11434
         options: >-
-          --health-cmd "curl -f http://localhost:11434/ || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd "ollama list || exit 1"
+          --health-interval 15s
+          --health-timeout 10s
+          --health-retries 10
 
     steps:
     - name: Checkout code
@@ -99,10 +99,10 @@ jobs:
         ports:
           - 11434:11434
         options: >-
-          --health-cmd "curl -f http://localhost:11434/ || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd "ollama list || exit 1"
+          --health-interval 15s
+          --health-timeout 10s
+          --health-retries 10
 
     steps:
     - name: Checkout code
