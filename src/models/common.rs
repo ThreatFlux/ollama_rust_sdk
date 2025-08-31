@@ -240,7 +240,7 @@ mod arguments_serde {
     use serde::{Deserialize, Deserializer, Serializer};
     use serde_json::Value;
 
-    pub fn serialize<S>(arguments: &String, serializer: S) -> Result<S::Ok, S::Error>
+    pub fn serialize<S>(arguments: &str, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
@@ -376,7 +376,7 @@ mod tests {
         // Test deserialization from JSON string
         let json = r#"{"name": "test_function", "arguments": "{\"param\": \"value\"}"}"#;
         let function_call: FunctionCall = serde_json::from_str(json).unwrap();
-        
+
         assert_eq!(function_call.name, "test_function");
         assert_eq!(function_call.arguments, r#"{"param": "value"}"#);
     }
@@ -386,10 +386,11 @@ mod tests {
         // Test deserialization from JSON object
         let json = r#"{"name": "test_function", "arguments": {"param": "value", "number": 42}}"#;
         let function_call: FunctionCall = serde_json::from_str(json).unwrap();
-        
+
         assert_eq!(function_call.name, "test_function");
         // The object should be converted to a string
-        let parsed_args: serde_json::Value = serde_json::from_str(&function_call.arguments).unwrap();
+        let parsed_args: serde_json::Value =
+            serde_json::from_str(&function_call.arguments).unwrap();
         assert_eq!(parsed_args["param"], "value");
         assert_eq!(parsed_args["number"], 42);
     }
@@ -399,10 +400,11 @@ mod tests {
         // Test deserialization from JSON array
         let json = r#"{"name": "test_function", "arguments": ["arg1", "arg2"]}"#;
         let function_call: FunctionCall = serde_json::from_str(json).unwrap();
-        
+
         assert_eq!(function_call.name, "test_function");
         // The array should be converted to a string
-        let parsed_args: serde_json::Value = serde_json::from_str(&function_call.arguments).unwrap();
+        let parsed_args: serde_json::Value =
+            serde_json::from_str(&function_call.arguments).unwrap();
         assert!(parsed_args.is_array());
         assert_eq!(parsed_args[0], "arg1");
         assert_eq!(parsed_args[1], "arg2");
@@ -414,7 +416,7 @@ mod tests {
             name: "test_function".to_string(),
             arguments: r#"{"param": "value"}"#.to_string(),
         };
-        
+
         let json = serde_json::to_string(&function_call).unwrap();
         let expected = r#"{"name":"test_function","arguments":"{\"param\": \"value\"}"}"#;
         assert_eq!(json, expected);
@@ -425,7 +427,7 @@ mod tests {
         // Test ToolCall without id
         let json = r#"{"function": {"name": "test_func", "arguments": "{\"key\": \"value\"}"}}"#;
         let tool_call: ToolCall = serde_json::from_str(json).unwrap();
-        
+
         assert!(tool_call.id.is_none());
         assert_eq!(tool_call.function.name, "test_func");
     }
@@ -435,7 +437,7 @@ mod tests {
         // Test ToolCall with id
         let json = r#"{"id": "call_123", "function": {"name": "test_func", "arguments": "{\"key\": \"value\"}"}}"#;
         let tool_call: ToolCall = serde_json::from_str(json).unwrap();
-        
+
         assert_eq!(tool_call.id, Some("call_123".to_string()));
         assert_eq!(tool_call.function.name, "test_func");
     }
@@ -450,10 +452,10 @@ mod tests {
                 arguments: r#"{"location": "New York"}"#.to_string(),
             },
         };
-        
+
         let json = serde_json::to_string(&tool_call).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        
+
         assert_eq!(parsed["id"], "call_456");
         assert_eq!(parsed["function"]["name"], "get_weather");
     }
@@ -482,7 +484,10 @@ mod tests {
             },
         };
         match specific_choice {
-            ToolChoice::Specific { tool_type, function } => {
+            ToolChoice::Specific {
+                tool_type,
+                function,
+            } => {
                 assert_eq!(tool_type, "function");
                 assert_eq!(function.name, "my_function");
             }

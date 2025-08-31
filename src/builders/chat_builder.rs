@@ -141,18 +141,18 @@ impl ChatBuilder {
     }
 
     /// Send the request (non-streaming)
-    /// 
+    ///
     /// # Errors
-    /// Returns an error if the request fails due to network issues, authentication problems, 
+    /// Returns an error if the request fails due to network issues, authentication problems,
     /// or invalid parameters.
     pub async fn send(self) -> Result<ChatResponse> {
         ChatApi::chat(&self.http_client, self.request).await
     }
 
     /// Send the request with streaming
-    /// 
+    ///
     /// # Errors
-    /// Returns an error if the request fails due to network issues, authentication problems, 
+    /// Returns an error if the request fails due to network issues, authentication problems,
     /// or invalid parameters.
     pub async fn stream(self) -> Result<ChatStream> {
         let stream = ChatApi::chat_stream(&self.http_client, self.request).await?;
