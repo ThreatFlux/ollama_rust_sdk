@@ -20,26 +20,26 @@ path = "src/main.rs"
 
 [dependencies]
 # HTTP client and async runtime
-reqwest = { workspace = true }
-tokio = { workspace = true }
+reqwest = { version = "0.12", features = ["json", "stream"] }
+tokio = { version = "1.48", features = ["macros", "rt-multi-thread", "sync", "time"] }
 tokio-stream = "0.1"
 
 # Serialization
-serde = { workspace = true }
-serde_json = { workspace = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 
 # Error handling
-thiserror = { workspace = true }
-anyhow = { workspace = true }
+thiserror = "2"
+anyhow = "1"
 
 # URL parsing
-url = { workspace = true }
+url = "2"
 
 # UUID generation
-uuid = { workspace = true }
+uuid = { version = "1", features = ["serde", "v4"] }
 
 # Async streaming
-futures = { workspace = true }
+futures = "0.3"
 futures-util = "0.3"
 
 # CLI support
@@ -51,7 +51,7 @@ log = "0.4"
 config = "0.13"
 
 # Additional dependencies for examples
-chrono = { workspace = true }
+chrono = { version = "0.4", features = ["serde"] }
 rand = "0.8"
 dirs = "5.0"
 
