@@ -42,7 +42,7 @@ impl HttpClient {
     }
 
     /// Make a POST request
-    pub fn post(&self, path: &str) -> PostRequestBuilder {
+    pub fn post(&self, path: &str) -> PostRequestBuilder<'_> {
         let url = self.config.endpoint_url(path).expect("Valid URL");
         PostRequestBuilder {
             request: self.client.post(url),
@@ -51,7 +51,7 @@ impl HttpClient {
     }
 
     /// Make a PUT request
-    pub fn put(&self, path: &str) -> PutRequestBuilder {
+    pub fn put(&self, path: &str) -> PutRequestBuilder<'_> {
         let url = self.config.endpoint_url(path).expect("Valid URL");
         PutRequestBuilder {
             request: self.client.put(url),
@@ -60,7 +60,7 @@ impl HttpClient {
     }
 
     /// Make a DELETE request
-    pub fn delete(&self, path: &str) -> DeleteRequestBuilder {
+    pub fn delete(&self, path: &str) -> DeleteRequestBuilder<'_> {
         let url = self.config.endpoint_url(path).expect("Valid URL");
         DeleteRequestBuilder {
             request: self.client.delete(url),

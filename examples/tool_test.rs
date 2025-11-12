@@ -49,9 +49,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("  Function: {}", call.function.name);
             println!("  Arguments: {}", call.function.arguments);
 
-            // Parse the arguments
-            let args: serde_json::Value = serde_json::from_str(&call.function.arguments)?;
-            println!("  Parsed expression: {}", args["expression"]);
+            if let Some(expr) = call.function.arguments.get("expression") {
+                println!("  Parsed expression: {}", expr);
+            }
         }
     } else {
         println!("\n❌ No tool calls in response");

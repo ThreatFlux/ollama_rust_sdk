@@ -1,6 +1,7 @@
 //! Common types shared across different API models
 
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 /// Generation options that can be applied to various requests
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -232,30 +233,38 @@ pub struct FunctionCall {
 
     /// Function arguments - can be either a JSON string or object
     #[serde(with = "arguments_serde")]
-    pub arguments: String,
+    pub arguments: Value,
 }
 
 /// Custom serialization for arguments field that can be string or object
 mod arguments_serde {
-    use serde::{Deserialize, Deserializer, Serializer};
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
     use serde_json::Value;
 
-    pub fn serialize<S>(arguments: &str, serializer: S) -> Result<S::Ok, S::Error>
+    pub fn serialize<S>(arguments: &Value, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        serializer.serialize_str(arguments)
+        arguments.serialize(serializer)
     }
 
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<String, D::Error>
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Value, D::Error>
     where
         D: Deserializer<'de>,
     {
         let value = Value::deserialize(deserializer)?;
         match value {
-            Value::String(s) => Ok(s),
-            Value::Object(_) | Value::Array(_) => Ok(value.to_string()),
-            _ => Ok(value.to_string()),
+            Value::String(text) => {
+                if text.trim().is_empty() {
+                    Ok(Value::String(text))
+                } else {
+                    match serde_json::from_str(&text) {
+                        Ok(parsed) => Ok(parsed),
+                        Err(_) => Ok(Value::String(text)),
+                    }
+                }
+            }
+            other => Ok(other),
         }
     }
 }
@@ -378,7 +387,7 @@ mod tests {
         let function_call: FunctionCall = serde_json::from_str(json).unwrap();
 
         assert_eq!(function_call.name, "test_function");
-        assert_eq!(function_call.arguments, r#"{"param": "value"}"#);
+        assert_eq!(function_call.arguments["param"], "value");
     }
 
     #[test]
@@ -388,11 +397,8 @@ mod tests {
         let function_call: FunctionCall = serde_json::from_str(json).unwrap();
 
         assert_eq!(function_call.name, "test_function");
-        // The object should be converted to a string
-        let parsed_args: serde_json::Value =
-            serde_json::from_str(&function_call.arguments).unwrap();
-        assert_eq!(parsed_args["param"], "value");
-        assert_eq!(parsed_args["number"], 42);
+        assert_eq!(function_call.arguments["param"], "value");
+        assert_eq!(function_call.arguments["number"], 42);
     }
 
     #[test]
@@ -402,24 +408,22 @@ mod tests {
         let function_call: FunctionCall = serde_json::from_str(json).unwrap();
 
         assert_eq!(function_call.name, "test_function");
-        // The array should be converted to a string
-        let parsed_args: serde_json::Value =
-            serde_json::from_str(&function_call.arguments).unwrap();
-        assert!(parsed_args.is_array());
-        assert_eq!(parsed_args[0], "arg1");
-        assert_eq!(parsed_args[1], "arg2");
+        assert!(function_call.arguments.is_array());
+        assert_eq!(function_call.arguments[0], "arg1");
+        assert_eq!(function_call.arguments[1], "arg2");
     }
 
     #[test]
     fn test_function_call_arguments_serialization() {
         let function_call = FunctionCall {
             name: "test_function".to_string(),
-            arguments: r#"{"param": "value"}"#.to_string(),
+            arguments: serde_json::json!({"param": "value"}),
         };
 
         let json = serde_json::to_string(&function_call).unwrap();
-        let expected = r#"{"name":"test_function","arguments":"{\"param\": \"value\"}"}"#;
-        assert_eq!(json, expected);
+        let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed["name"], "test_function");
+        assert_eq!(parsed["arguments"]["param"], "value");
     }
 
     #[test]
@@ -449,7 +453,7 @@ mod tests {
             tool_type: Some("function".to_string()),
             function: FunctionCall {
                 name: "get_weather".to_string(),
-                arguments: r#"{"location": "New York"}"#.to_string(),
+                arguments: serde_json::json!({"location": "New York"}),
             },
         };
 
@@ -525,21 +529,24 @@ mod tests {
         // Test with empty string
         let json = r#"{"name": "test", "arguments": ""}"#;
         let function_call: FunctionCall = serde_json::from_str(json).unwrap();
-        assert_eq!(function_call.arguments, "");
+        assert_eq!(function_call.arguments, Value::String(String::new()));
 
-        // Test with null (should become string "null")
+        // Test with null (should remain null)
         let json = r#"{"name": "test", "arguments": null}"#;
         let function_call: FunctionCall = serde_json::from_str(json).unwrap();
-        assert_eq!(function_call.arguments, "null");
+        assert_eq!(function_call.arguments, Value::Null);
 
-        // Test with number (should become string)
+        // Test with number (should remain number)
         let json = r#"{"name": "test", "arguments": 42}"#;
         let function_call: FunctionCall = serde_json::from_str(json).unwrap();
-        assert_eq!(function_call.arguments, "42");
+        assert_eq!(
+            function_call.arguments,
+            Value::Number(serde_json::Number::from(42))
+        );
 
-        // Test with boolean (should become string)
+        // Test with boolean (should remain boolean)
         let json = r#"{"name": "test", "arguments": true}"#;
         let function_call: FunctionCall = serde_json::from_str(json).unwrap();
-        assert_eq!(function_call.arguments, "true");
+        assert_eq!(function_call.arguments, Value::Bool(true));
     }
 }

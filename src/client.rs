@@ -11,7 +11,8 @@ use crate::{
     },
     utils::http::HttpClient,
 };
-use std::sync::Arc;
+use serde_json::Value;
+use std::{env, sync::Arc, time::Duration};
 
 /// Main client for interacting with the Ollama API
 #[derive(Debug, Clone)]
@@ -37,6 +38,44 @@ impl OllamaClient {
             http_client: Arc::new(http_client),
             config: Arc::new(config),
         })
+    }
+
+    /// Create a new Ollama client using environment variables.
+    ///
+    /// Supported variables:
+    /// - `OLLAMA_BASE_URL` (defaults to `http://127.0.0.1:11434`)
+    /// - `OLLAMA_TIMEOUT_SECS`
+    /// - `OLLAMA_USER_AGENT`
+    /// - `OLLAMA_API_HEADERS` (JSON object of header key/value pairs)
+    pub fn from_env() -> Result<Self> {
+        let base_url =
+            env::var("OLLAMA_BASE_URL").unwrap_or_else(|_| "http://127.0.0.1:11434".to_string());
+        let mut builder = ClientConfig::builder().base_url(base_url);
+
+        if let Ok(timeout_raw) = env::var("OLLAMA_TIMEOUT_SECS") {
+            let timeout_secs = timeout_raw.parse::<u64>().map_err(|err| {
+                OllamaError::ConfigError(format!(
+                    "Invalid OLLAMA_TIMEOUT_SECS value '{}': {}",
+                    timeout_raw, err
+                ))
+            })?;
+            builder = builder.timeout(Duration::from_secs(timeout_secs));
+        }
+
+        if let Ok(user_agent) = env::var("OLLAMA_USER_AGENT") {
+            if !user_agent.trim().is_empty() {
+                builder = builder.user_agent(user_agent);
+            }
+        }
+
+        if let Ok(headers_raw) = env::var("OLLAMA_API_HEADERS") {
+            for (key, value) in parse_env_headers(&headers_raw)? {
+                builder = builder.header(key, value);
+            }
+        }
+
+        let config = builder.build()?;
+        Self::with_config(config)
     }
 
     /// Get the client configuration
@@ -204,6 +243,36 @@ impl EmbedRequestBuilder {
     }
 }
 
+fn parse_env_headers(raw: &str) -> Result<Vec<(String, String)>> {
+    if raw.trim().is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let value: Value = serde_json::from_str(raw).map_err(|err| {
+        OllamaError::ConfigError(format!("OLLAMA_API_HEADERS must be a JSON object: {}", err))
+    })?;
+
+    let obj = value.as_object().ok_or_else(|| {
+        OllamaError::ConfigError("OLLAMA_API_HEADERS must be a JSON object".to_string())
+    })?;
+
+    let mut headers = Vec::with_capacity(obj.len());
+    for (key, value) in obj {
+        let header_value = match value {
+            Value::String(text) => text.clone(),
+            other => other.to_string(),
+        };
+
+        if key.is_empty() {
+            continue;
+        }
+
+        headers.push((key.clone(), header_value));
+    }
+
+    Ok(headers)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -229,6 +298,14 @@ mod tests {
     fn test_client_with_invalid_url() {
         let client = OllamaClient::new("invalid-url");
         assert!(client.is_err());
+    }
+
+    #[test]
+    fn parse_headers_handles_json_objects() {
+        let raw = r#"{"X-Test":"value","x-Second":"two"}"#;
+        let headers = parse_env_headers(raw).expect("headers");
+        assert!(headers.contains(&("X-Test".to_string(), "value".to_string())));
+        assert!(headers.contains(&("x-Second".to_string(), "two".to_string())));
     }
 
     #[test]

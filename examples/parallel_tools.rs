@@ -161,17 +161,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             if let Some(tool_calls) = response.message.tool_calls {
                 for tool_call in tool_calls {
                     println!("🔧 Tool Call: {}", tool_call.function.name);
-                    let args: serde_json::Value =
-                        serde_json::from_str(&tool_call.function.arguments)?;
-
+                    let args = &tool_call.function.arguments;
                     let result = match tool_call.function.name.as_str() {
                         "search_all" => {
-                            let query = args["query"].as_str().unwrap_or("default");
+                            let query = args
+                                .get("query")
+                                .and_then(|value| value.as_str())
+                                .unwrap_or("default");
                             search_all(query).await
                         }
                         "fetch_data" => {
-                            let source = args["source"].as_str().unwrap_or("cache");
-                            let query = args["query"].as_str().unwrap_or("default");
+                            let source = args
+                                .get("source")
+                                .and_then(|value| value.as_str())
+                                .unwrap_or("cache");
+                            let query = args
+                                .get("query")
+                                .and_then(|value| value.as_str())
+                                .unwrap_or("default");
                             fetch_data(source, query).await
                         }
                         _ => json!({"error": "Unknown tool"}),

@@ -150,16 +150,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("\n  Tool Call #{}:", i + 1);
         println!("    Function: {}", call.function.name);
 
-        // Parse and display arguments
-        if let Ok(args) = serde_json::from_str::<serde_json::Value>(&call.function.arguments) {
-            if call.function.name == "get_weather" {
-                println!("    Location: {}", args["location"].as_str().unwrap_or("?"));
-            } else if call.function.name == "calculate" {
-                println!(
-                    "    Expression: {}",
-                    args["expression"].as_str().unwrap_or("?")
-                );
-            }
+        let args = &call.function.arguments;
+        if call.function.name == "get_weather" {
+            let location = args
+                .get("location")
+                .and_then(|value| value.as_str())
+                .unwrap_or("?");
+            println!("    Location: {}", location);
+        } else if call.function.name == "calculate" {
+            let expression = args
+                .get("expression")
+                .and_then(|value| value.as_str())
+                .unwrap_or("?");
+            println!("    Expression: {}", expression);
         }
     }
 

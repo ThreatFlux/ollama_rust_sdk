@@ -136,23 +136,31 @@ fn process_tool_call(tool_call: &ToolCall) -> String {
     println!("  🔧 Processing tool call: {}", tool_call.function.name);
     println!("     Arguments: {}", tool_call.function.arguments);
 
-    // Parse the arguments
-    let args: serde_json::Value =
-        serde_json::from_str(&tool_call.function.arguments).unwrap_or_else(|_| json!({}));
-
-    // Call the appropriate function based on the name
+    let args = &tool_call.function.arguments;
     let result = match tool_call.function.name.as_str() {
         "get_weather" => {
-            let location = args["location"].as_str().unwrap_or("Unknown");
-            let unit = args["unit"].as_str().unwrap_or("celsius");
+            let location = args
+                .get("location")
+                .and_then(|value| value.as_str())
+                .unwrap_or("Unknown");
+            let unit = args
+                .get("unit")
+                .and_then(|value| value.as_str())
+                .unwrap_or("celsius");
             get_weather(location, unit)
         }
         "get_stock_price" => {
-            let symbol = args["symbol"].as_str().unwrap_or("UNKNOWN");
+            let symbol = args
+                .get("symbol")
+                .and_then(|value| value.as_str())
+                .unwrap_or("UNKNOWN");
             get_stock_price(symbol)
         }
         "calculate" => {
-            let expression = args["expression"].as_str().unwrap_or("0");
+            let expression = args
+                .get("expression")
+                .and_then(|value| value.as_str())
+                .unwrap_or("0");
             calculate(expression)
         }
         _ => json!({"error": "Unknown function"}),

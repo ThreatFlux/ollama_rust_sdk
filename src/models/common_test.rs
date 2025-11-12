@@ -66,14 +66,14 @@ mod tests {
         assert_eq!(tool_call.id, "call_123");
         assert_eq!(tool_call.tool_type, "function");
         assert_eq!(tool_call.function.name, "get_weather");
-        assert!(tool_call.function.arguments.contains("San Francisco"));
+        assert_eq!(tool_call.function.arguments["location"], "San Francisco");
     }
 
     #[test]
     fn test_function_call_serialization() {
         let func_call = FunctionCall {
             name: "calculate".to_string(),
-            arguments: r#"{"expression": "2 + 2"}"#.to_string(),
+            arguments: json!({"expression": "2 + 2"}),
         };
 
         let serialized = serde_json::to_string(&func_call).unwrap();

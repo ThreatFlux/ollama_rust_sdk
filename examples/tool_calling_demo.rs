@@ -151,16 +151,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             for call in tool_calls {
                 println!("  → Function: {}", call.function.name);
 
-                // Parse arguments and execute
-                let args: serde_json::Value = serde_json::from_str(&call.function.arguments)?;
-
+                let args = &call.function.arguments;
                 let result = match call.function.name.as_str() {
                     "get_weather" => {
-                        let location = args["location"].as_str().unwrap_or("Unknown");
+                        let location = args
+                            .get("location")
+                            .and_then(|value| value.as_str())
+                            .unwrap_or("Unknown");
                         get_weather(location)
                     }
                     "calculate" => {
-                        let expr = args["expression"].as_str().unwrap_or("0");
+                        let expr = args
+                            .get("expression")
+                            .and_then(|value| value.as_str())
+                            .unwrap_or("0");
                         calculate(expr)
                     }
                     _ => "Unknown function".to_string(),
