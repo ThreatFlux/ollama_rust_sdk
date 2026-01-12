@@ -87,7 +87,7 @@ jobs:
       run: |
         echo "## Code Complexity Report" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
-        ./scc --complexity --sort complexity src/ >> $GITHUB_STEP_SUMMARY
+        ./scc --sort complexity src/ >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
         
         echo "## Lines of Code" >> $GITHUB_STEP_SUMMARY
