@@ -1,6 +1,6 @@
 [package]
 name = "ollama_rust_sdk"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 rust-version = "1.81"
 authors = ["Your Name <your.email@example.com>"]
@@ -20,7 +20,7 @@ path = "src/main.rs"
 
 [dependencies]
 # HTTP client and async runtime
-reqwest = { version = "0.12", features = ["json", "stream"] }
+reqwest = { version = "0.13.1", features = ["json", "stream"] }
 tokio = { version = "1.48", features = ["macros", "rt-multi-thread", "sync", "time"] }
 tokio-stream = "0.1"
 
@@ -44,19 +44,19 @@ futures-util = "0.3"
 
 # CLI support
 clap = { version = "4.0", features = ["derive"] }
-env_logger = "0.10"
+env_logger = "0.11.8"
 log = "0.4"
 
 # Configuration
-config = "0.13"
+config = "0.15.19"
 
 # Additional dependencies for examples
 chrono = { version = "0.4", features = ["serde"] }
-rand = "0.8"
-dirs = "5.0"
+rand = "0.9.2"
+dirs = "6.0"
 
 # Optional: TLS support
-rustls = { version = "0.21", optional = true }
+rustls = { version = "0.23.36", optional = true }
 
 # Optional: Tracing support
 tracing = { version = "0.1", optional = true }
@@ -64,16 +64,16 @@ tracing-subscriber = { version = "0.3", optional = true }
 
 [dev-dependencies]
 tokio-test = "0.4"
-wiremock = "0.5"
+wiremock = "0.6.5"
 tempfile = "3.0"
-mockall = "0.11"
-rstest = "0.18"
+mockall = "0.14.0"
+rstest = "0.26.1"
 assert-json-diff = "2.0"
 pretty_assertions = "1.4"
 
 [features]
 default = ["tls"]
-tls = ["reqwest/rustls-tls", "dep:rustls"]
+tls = ["reqwest/rustls", "dep:rustls"]
 tracing = ["dep:tracing", "dep:tracing-subscriber"]
 
 [package.metadata.docs.rs]

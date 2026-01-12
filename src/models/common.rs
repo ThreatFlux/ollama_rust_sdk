@@ -283,19 +283,14 @@ pub struct Usage {
 }
 
 /// Format types for responses
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ResponseFormat {
     /// Default text format
+    #[default]
     Text,
     /// JSON format
     Json,
-}
-
-impl Default for ResponseFormat {
-    fn default() -> Self {
-        Self::Text
-    }
 }
 
 /// Keep alive configuration
