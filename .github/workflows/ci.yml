@@ -21,7 +21,7 @@ jobs:
         rust: [stable, beta]
         include:
           - os: ubuntu-latest
-            rust: 1.81.0  # MSRV (Minimum Supported Rust Version)
+            rust: 1.89.0  # MSRV (Minimum Supported Rust Version)
     runs-on: ${{ matrix.os }}
     
     steps:

@@ -175,7 +175,7 @@ The SDK works with all Ollama-compatible models, including:
 
 ## Requirements
 
-- Rust 1.70 or higher
+- Rust 1.89 or higher
 - Ollama server running locally or remotely
 - At least one model pulled in Ollama
 

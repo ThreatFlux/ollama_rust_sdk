@@ -35,11 +35,8 @@ jobs:
 
     - name: Install cargo-deny
       run: |
-        # Install a specific version that supports newer Cargo.lock formats
-        wget https://github.com/EmbarkStudios/cargo-deny/releases/download/0.14.3/cargo-deny-0.14.3-x86_64-unknown-linux-musl.tar.gz
-        tar -xzf cargo-deny-0.14.3-x86_64-unknown-linux-musl.tar.gz
-        sudo mv cargo-deny-0.14.3-x86_64-unknown-linux-musl/cargo-deny /usr/local/bin/
-        sudo chmod +x /usr/local/bin/cargo-deny
+        # Keep cargo-deny current for advisory format compatibility (e.g. CVSS v4)
+        cargo install cargo-deny --locked --version 0.19.0
         
     - name: Run cargo-deny check
       run: |
