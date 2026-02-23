@@ -51,6 +51,16 @@ allow = ["ISC"]
 name = "rustls-webpki"
 
 [[licenses.exceptions]]
+# aws-lc-sys includes OpenSSL in its composite license expression
+allow = ["Apache-2.0", "ISC", "OpenSSL"]
+name = "aws-lc-sys"
+
+[[licenses.exceptions]]
+# foldhash is licensed under Zlib
+allow = ["Zlib"]
+name = "foldhash"
+
+[[licenses.exceptions]]
 # ring uses a combination of licenses
 allow = ["MIT", "ISC", "OpenSSL"]
 name = "ring"
