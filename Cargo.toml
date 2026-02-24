@@ -44,9 +44,6 @@ clap = { version = "4.5.60", features = ["derive"] }
 env_logger = "0.11.9"
 log = "0.4.29"
 
-# Configuration
-config = "0.15.19"
-
 # Additional dependencies for examples
 chrono = { version = "0.4.44", features = ["serde"] }
 
