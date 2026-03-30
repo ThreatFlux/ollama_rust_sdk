@@ -1,6 +1,11 @@
 # Ollama Rust SDK
 
-A comprehensive Rust SDK for interacting with the Ollama API. This SDK provides type-safe, async-first bindings for all Ollama API endpoints including text generation, chat, embeddings, and model management.
+[![CI](https://github.com/ThreatFlux/ollama_rust_sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/ThreatFlux/ollama_rust_sdk/actions/workflows/ci.yml)
+[![Security](https://github.com/ThreatFlux/ollama_rust_sdk/actions/workflows/security.yml/badge.svg)](https://github.com/ThreatFlux/ollama_rust_sdk/actions/workflows/security.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Rust](https://img.shields.io/badge/rust-1.94.0%2B-blue.svg)](https://www.rust-lang.org)
+
+A comprehensive Rust SDK for interacting with the Ollama API. Type-safe, async-first bindings for text generation, chat, embeddings, and model management.
 
 ## Features
 
@@ -19,28 +24,26 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-ollama_rust_sdk = "0.1.0"
-tokio = { version = "1.0", features = ["full"] }
+ollama_rust_sdk = "0.1.1"
+tokio = { version = "1.50", features = ["full"] }
 ```
 
 ## Quick Start
 
 ```rust
-use ollama_rust_sdk::{OllamaClient, GenerateRequest};
+use ollama_rust_sdk::OllamaClient;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Create a client
     let client = OllamaClient::new("http://localhost:11434")?;
-    
-    // Generate text
+
     let response = client
         .generate()
         .model("qwen3:30b-a3b")
         .prompt("Why is the sky blue?")
         .send()
         .await?;
-    
+
     println!("Response: {}", response.response);
     Ok(())
 }
@@ -97,8 +100,6 @@ let embeddings = client
 
 ## CLI Usage
 
-The SDK includes a CLI tool for interacting with Ollama from the command line:
-
 ```bash
 # Generate text
 ollama-cli generate "Why is the sky blue?" --model qwen3:30b-a3b
@@ -115,8 +116,6 @@ ollama-cli models pull qwen3:30b-a3b
 
 ## Configuration
 
-The SDK supports various configuration options:
-
 ```rust
 use ollama_rust_sdk::{OllamaClient, ClientConfig};
 
@@ -127,6 +126,15 @@ let config = ClientConfig::builder()
 
 let client = OllamaClient::with_config(config)?;
 ```
+
+Environment variables are also supported:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `OLLAMA_BASE_URL` | Ollama server URL | `http://127.0.0.1:11434` |
+| `OLLAMA_TIMEOUT_SECS` | Request timeout in seconds | `30` |
+| `OLLAMA_USER_AGENT` | Custom user agent string | - |
+| `OLLAMA_API_HEADERS` | Custom headers as JSON | - |
 
 ## Model Management
 
@@ -146,8 +154,6 @@ client.delete_model("old-model").await?;
 
 ## Error Handling
 
-The SDK provides comprehensive error handling:
-
 ```rust
 use ollama_rust_sdk::{OllamaError, OllamaClient};
 
@@ -163,19 +169,27 @@ match client.generate().model("invalid-model").send().await {
 }
 ```
 
-## Supported Models
+## Development
 
-The SDK works with all Ollama-compatible models, including:
+```bash
+# Install development tools
+make dev-setup
 
-- **Qwen3**: `qwen3:30b-a3b`, `qwen3:7b`
-- **GPT-OSS**: `gpt-oss:20b`
-- **Llama**: `llama2`, `llama3`
-- **Code Llama**: `codellama`
-- **Embeddings**: `qwen3-embedding:8b`
+# Run all CI checks locally
+make ci-local
+
+# Format, lint, test
+make fmt
+make lint
+make test
+
+# Run with coverage
+make coverage
+```
 
 ## Requirements
 
-- Rust 1.89 or higher
+- Rust 1.94.0 or higher
 - Ollama server running locally or remotely
 - At least one model pulled in Ollama
 
@@ -185,4 +199,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Security
+
+To report a vulnerability, see [SECURITY.md](SECURITY.md).
