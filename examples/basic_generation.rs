@@ -40,11 +40,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Use the first available model, or default to qwen3:30b-a3b
     let models = client.list_models().await?;
-    let model_name = models
-        .models
-        .first()
-        .map(|m| m.name.as_str())
-        .unwrap_or("qwen3:30b-a3b");
+    let model_name = models.models.first().map(|m| m.name.as_str()).unwrap_or("qwen3:30b-a3b");
 
     println!("\nUsing model: {}", model_name);
 

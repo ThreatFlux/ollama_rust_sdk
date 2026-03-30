@@ -22,10 +22,7 @@ pub struct GenerateBuilder {
 impl GenerateBuilder {
     /// Create a new generate builder
     pub fn new(http_client: Arc<HttpClient>) -> Self {
-        Self {
-            http_client,
-            request: GenerateRequest::default(),
-        }
+        Self { http_client, request: GenerateRequest::default() }
     }
 
     /// Set the model to use

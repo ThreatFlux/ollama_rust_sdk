@@ -278,12 +278,7 @@ async fn test_embeddings_performance() {
     ];
 
     let start = Instant::now();
-    let response = client
-        .embed()
-        .model(model_name)
-        .input(texts.clone())
-        .send()
-        .await;
+    let response = client.embed().model(model_name).input(texts.clone()).send().await;
     let duration = start.elapsed();
 
     match response {

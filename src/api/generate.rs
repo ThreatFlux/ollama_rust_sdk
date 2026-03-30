@@ -22,11 +22,7 @@ impl GenerateApi {
     ) -> Result<GenerateResponse> {
         request.stream = Some(false);
 
-        let response = http_client
-            .post("api/generate")
-            .json(&request)
-            .send()
-            .await?;
+        let response = http_client.post("api/generate").json(&request).send().await?;
 
         if !response.status().is_success() {
             return Err(OllamaError::ServerError {
@@ -35,10 +31,8 @@ impl GenerateApi {
             });
         }
 
-        let generate_response: GenerateResponse = response
-            .json()
-            .await
-            .map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
+        let generate_response: GenerateResponse =
+            response.json().await.map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
 
         Ok(generate_response)
     }
@@ -50,14 +44,10 @@ impl GenerateApi {
     pub async fn generate_stream(
         http_client: &Arc<HttpClient>,
         mut request: GenerateRequest,
-    ) -> Result<impl tokio_stream::Stream<Item = Result<GenerateResponse>>> {
+    ) -> Result<impl tokio_stream::Stream<Item = Result<GenerateResponse>> + use<>> {
         request.stream = Some(true);
 
-        let response = http_client
-            .post("api/generate")
-            .json(&request)
-            .send()
-            .await?;
+        let response = http_client.post("api/generate").json(&request).send().await?;
 
         if !response.status().is_success() {
             return Err(OllamaError::ServerError {
@@ -92,9 +82,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_generate_request_format() {
-        let request = GenerateRequest::new("test-model", "test prompt")
-            .stream(false)
-            .system("test system");
+        let request =
+            GenerateRequest::new("test-model", "test prompt").stream(false).system("test system");
 
         assert_eq!(request.model, "test-model");
         assert_eq!(request.prompt, "test prompt");

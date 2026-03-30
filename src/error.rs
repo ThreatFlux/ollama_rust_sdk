@@ -85,19 +85,13 @@ impl OllamaError {
             OllamaError::NetworkError(_)
                 | OllamaError::Timeout
                 | OllamaError::ModelLoading(_)
-                | OllamaError::ServerError {
-                    status: 500..=599,
-                    ..
-                }
+                | OllamaError::ServerError { status: 500..=599, .. }
         )
     }
 
     /// Check if the error indicates the model is not available
     pub fn is_model_unavailable(&self) -> bool {
-        matches!(
-            self,
-            OllamaError::ModelNotFound(_) | OllamaError::ModelLoading(_)
-        )
+        matches!(self, OllamaError::ModelNotFound(_) | OllamaError::ModelLoading(_))
     }
 
     /// Get the HTTP status code if this is a server error
@@ -121,10 +115,7 @@ mod tests {
     async fn test_network_error_conversion() {
         // Create an actual reqwest error by making an invalid request
         let client = reqwest::Client::new();
-        let result = client
-            .get("http://invalid-domain-that-does-not-exist.test/")
-            .send()
-            .await;
+        let result = client.get("http://invalid-domain-that-does-not-exist.test/").send().await;
 
         match result {
             Err(reqwest_error) => {
@@ -194,10 +185,8 @@ mod tests {
 
     #[test]
     fn test_server_error_retryable() {
-        let error = OllamaError::ServerError {
-            status: 503,
-            message: "Service Unavailable".to_string(),
-        };
+        let error =
+            OllamaError::ServerError { status: 503, message: "Service Unavailable".to_string() };
 
         assert!(error.to_string().contains("Server error: 503"));
         assert!(error.is_retryable());
@@ -207,10 +196,7 @@ mod tests {
 
     #[test]
     fn test_server_error_not_retryable() {
-        let error = OllamaError::ServerError {
-            status: 400,
-            message: "Bad Request".to_string(),
-        };
+        let error = OllamaError::ServerError { status: 400, message: "Bad Request".to_string() };
 
         assert!(error.to_string().contains("Server error: 400"));
         assert!(!error.is_retryable());
@@ -283,9 +269,7 @@ mod tests {
     fn test_model_loading() {
         let error = OllamaError::ModelLoading("llama3".to_string());
 
-        assert!(error
-            .to_string()
-            .contains("Model 'llama3' is currently loading"));
+        assert!(error.to_string().contains("Model 'llama3' is currently loading"));
         assert!(error.is_retryable());
         assert!(error.is_model_unavailable());
     }

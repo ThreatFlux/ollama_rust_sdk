@@ -26,11 +26,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .copied()
         .unwrap_or_else(|| {
             // Use first available model as fallback
-            models
-                .models
-                .first()
-                .map(|m| m.name.as_str())
-                .unwrap_or("qwen3:30b-a3b")
+            models.models.first().map(|m| m.name.as_str()).unwrap_or("qwen3:30b-a3b")
         });
 
     println!("Using embedding model: {}", embedding_model);
@@ -39,25 +35,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("\n--- Single Text Embedding ---");
     let single_text = "The quick brown fox jumps over the lazy dog.";
 
-    match client
-        .embed()
-        .model(embedding_model)
-        .input(single_text)
-        .send()
-        .await
-    {
+    match client.embed().model(embedding_model).input(single_text).send().await {
         Ok(response) => {
             println!("Input text: \"{}\"", single_text);
-            println!(
-                "Embedding dimensions: {}",
-                response.dimensions().unwrap_or(0)
-            );
+            println!("Embedding dimensions: {}", response.dimensions().unwrap_or(0));
 
             if let Some(embedding) = response.get_embedding(0) {
-                println!(
-                    "First 10 values: {:?}",
-                    &embedding[..10.min(embedding.len())]
-                );
+                println!("First 10 values: {:?}", &embedding[..10.min(embedding.len())]);
 
                 // Calculate magnitude (L2 norm)
                 let magnitude: f64 = embedding.iter().map(|x| x * x).sum::<f64>().sqrt();
@@ -79,40 +63,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "I enjoy reading books.",
     ];
 
-    match client
-        .embed()
-        .model(embedding_model)
-        .input(texts.clone())
-        .truncate(true)
-        .send()
-        .await
-    {
+    match client.embed().model(embedding_model).input(texts.clone()).truncate(true).send().await {
         Ok(response) => {
             println!("Generated {} embeddings", response.count());
-            println!(
-                "Embedding dimensions: {}",
-                response.dimensions().unwrap_or(0)
-            );
+            println!("Embedding dimensions: {}", response.dimensions().unwrap_or(0));
 
             // Calculate pairwise similarities
             println!("\n--- Similarity Analysis ---");
             for (i, text1) in texts.iter().enumerate() {
                 for (j, text2) in texts.iter().enumerate() {
-                    if i < j {
-                        if let (Some(emb1), Some(emb2)) =
+                    if i < j
+                        && let (Some(emb1), Some(emb2)) =
                             (response.get_embedding(i), response.get_embedding(j))
-                        {
-                            if let Some(similarity) =
-                                ollama_rust_sdk::models::embedding::EmbedResponse::cosine_similarity(
-                                    emb1, emb2,
-                                )
-                            {
-                                println!(
-                                    "Similarity between \"{}\" and \"{}\": {:.4}",
-                                    text1, text2, similarity
-                                );
-                            }
-                        }
+                        && let Some(similarity) =
+                            ollama_rust_sdk::models::embedding::EmbedResponse::cosine_similarity(
+                                emb1, emb2,
+                            )
+                    {
+                        println!(
+                            "Similarity between \"{}\" and \"{}\": {:.4}",
+                            text1, text2, similarity
+                        );
                     }
                 }
             }
@@ -125,17 +96,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 for j in (i + 1)..texts.len() {
                     if let (Some(emb1), Some(emb2)) =
                         (response.get_embedding(i), response.get_embedding(j))
-                    {
-                        if let Some(similarity) =
+                        && let Some(similarity) =
                             ollama_rust_sdk::models::embedding::EmbedResponse::cosine_similarity(
                                 emb1, emb2,
                             )
-                        {
-                            if similarity > max_similarity {
-                                max_similarity = similarity;
-                                most_similar = (i, j);
-                            }
-                        }
+                        && similarity > max_similarity
+                    {
+                        max_similarity = similarity;
+                        most_similar = (i, j);
                     }
                 }
             }

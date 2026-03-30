@@ -161,9 +161,6 @@ mod tests {
         assert_eq!(deserialized.step, 5);
         assert_eq!(deserialized.total, 10);
         assert_eq!(deserialized.status, "Processing");
-        assert_eq!(
-            deserialized.detail,
-            Some("Working on step 5 of 10".to_string())
-        );
+        assert_eq!(deserialized.detail, Some("Working on step 5 of 10".to_string()));
     }
 }

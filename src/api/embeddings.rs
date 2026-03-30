@@ -33,10 +33,8 @@ impl EmbeddingsApi {
             });
         }
 
-        let embed_response: EmbedResponse = response
-            .json()
-            .await
-            .map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
+        let embed_response: EmbedResponse =
+            response.json().await.map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
 
         Ok(embed_response)
     }
@@ -49,11 +47,7 @@ impl EmbeddingsApi {
         http_client: &Arc<HttpClient>,
         request: LegacyEmbeddingRequest,
     ) -> Result<LegacyEmbeddingResponse> {
-        let response = http_client
-            .post("api/embeddings")
-            .json(&request)
-            .send()
-            .await?;
+        let response = http_client.post("api/embeddings").json(&request).send().await?;
 
         if !response.status().is_success() {
             let status = response.status().as_u16();
@@ -65,10 +59,8 @@ impl EmbeddingsApi {
             });
         }
 
-        let embed_response: LegacyEmbeddingResponse = response
-            .json()
-            .await
-            .map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
+        let embed_response: LegacyEmbeddingResponse =
+            response.json().await.map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
 
         Ok(embed_response)
     }

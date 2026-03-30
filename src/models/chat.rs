@@ -168,10 +168,7 @@ pub struct FunctionChoice {
 impl ChatRequest {
     /// Create a new chat request
     pub fn new<S: Into<String>>(model: S) -> Self {
-        Self {
-            model: model.into(),
-            ..Default::default()
-        }
+        Self { model: model.into(), ..Default::default() }
     }
 
     /// Add a message to the conversation

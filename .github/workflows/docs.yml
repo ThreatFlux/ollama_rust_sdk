@@ -2,9 +2,9 @@ name: Documentation
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -16,69 +16,73 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+env:
+  CARGO_TERM_COLOR: always
+  RUST_VERSION: 1.94.0
+
 jobs:
   build-docs:
     name: Build Documentation
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
 
-    - name: Cache cargo
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-        key: ${{ runner.os }}-cargo-docs-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache cargo
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target
+          key: ${{ runner.os }}-cargo-docs-${{ hashFiles('**/Cargo.lock') }}
 
-    - name: Build documentation
-      run: |
-        cargo doc --all-features --no-deps
-        echo '<meta http-equiv="refresh" content="0; url=ollama_rust_sdk/index.html">' > target/doc/index.html
-        
-    - name: Add examples to docs
-      run: |
-        mkdir -p target/doc/examples
-        cp examples/*.rs target/doc/examples/
-        
-        # Create an index of examples
-        cat > target/doc/examples/index.html << 'EOF'
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Ollama Rust SDK Examples</title>
-            <style>
-                body { font-family: sans-serif; margin: 40px; }
-                h1 { color: #333; }
-                .example { margin: 10px 0; }
-                a { color: #0366d6; text-decoration: none; }
-                a:hover { text-decoration: underline; }
-            </style>
-        </head>
-        <body>
-            <h1>Ollama Rust SDK Examples</h1>
-            <div class="example"><a href="basic_generation.rs">Basic Generation</a> - Simple text generation example</div>
-            <div class="example"><a href="streaming_chat.rs">Streaming Chat</a> - Real-time streaming chat</div>
-            <div class="example"><a href="embeddings.rs">Embeddings</a> - Generate and compare embeddings</div>
-            <div class="example"><a href="tool_calling.rs">Tool Calling</a> - Function calling with tools</div>
-            <div class="example"><a href="streaming_tools.rs">Streaming Tools</a> - Streaming with tool calls</div>
-            <div class="example"><a href="parallel_tools.rs">Parallel Tools</a> - Parallel tool execution</div>
-            <p><a href="../index.html">← Back to API Documentation</a></p>
-        </body>
-        </html>
-        EOF
-        
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: target/doc
+      - name: Build documentation
+        run: |
+          cargo doc --all-features --no-deps
+          echo '<meta http-equiv="refresh" content="0; url=ollama_rust_sdk/index.html">' > target/doc/index.html
+
+      - name: Add examples to docs
+        run: |
+          mkdir -p target/doc/examples
+          cp examples/*.rs target/doc/examples/
+
+          cat > target/doc/examples/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Ollama Rust SDK Examples</title>
+              <style>
+                  body { font-family: sans-serif; margin: 40px; }
+                  h1 { color: #333; }
+                  .example { margin: 10px 0; }
+                  a { color: #0366d6; text-decoration: none; }
+                  a:hover { text-decoration: underline; }
+              </style>
+          </head>
+          <body>
+              <h1>Ollama Rust SDK Examples</h1>
+              <div class="example"><a href="basic_generation.rs">Basic Generation</a> - Simple text generation example</div>
+              <div class="example"><a href="streaming_chat.rs">Streaming Chat</a> - Real-time streaming chat</div>
+              <div class="example"><a href="embeddings.rs">Embeddings</a> - Generate and compare embeddings</div>
+              <div class="example"><a href="tool_calling.rs">Tool Calling</a> - Function calling with tools</div>
+              <div class="example"><a href="streaming_tools.rs">Streaming Tools</a> - Streaming with tool calls</div>
+              <div class="example"><a href="parallel_tools.rs">Parallel Tools</a> - Parallel tool execution</div>
+              <p><a href="../index.html">Back to API Documentation</a></p>
+          </body>
+          </html>
+          EOF
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@4ee47c74cee0d21fbb879ea2d5ebe9b3d4f580df # v3.0.2
+        with:
+          path: target/doc
 
   deploy-docs:
     name: Deploy Documentation
@@ -88,30 +92,30 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build-docs
-    
+
     steps:
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@0e40adce88c2b98e1f20a2e16853708e8c8f1d70 # v4.0.7
 
   check-links:
     name: Check Documentation Links
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    - name: Link Checker
-      uses: lycheeverse/lychee-action@v2
-      with:
-        args: >-
-          --verbose
-          --no-progress
-          --accept 200,204,206,301,302
-          --exclude-loopback
-          --exclude-mail
-          --exclude "localhost"
-          --exclude "127.0.0.1"
-          "**/*.md"
-          "**/*.rs"
-        fail: false  # Don't fail the build on broken links
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@7cd0af4c74a61395d455af97419e77eadcc22cfd # v2.4.1
+        with:
+          args: >-
+            --verbose
+            --no-progress
+            --accept 200,204,206,301,302
+            --exclude-loopback
+            --exclude-mail
+            --exclude "localhost"
+            --exclude "127.0.0.1"
+            "**/*.md"
+            "**/*.rs"
+          fail: false

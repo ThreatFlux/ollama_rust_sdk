@@ -201,11 +201,7 @@ impl Tool {
     pub fn function(name: String, description: String, parameters: serde_json::Value) -> Self {
         Self {
             tool_type: "function".to_string(),
-            function: ToolFunction {
-                name,
-                description,
-                parameters,
-            },
+            function: ToolFunction { name, description, parameters },
         }
     }
 }
@@ -330,11 +326,7 @@ mod tests {
 
     #[test]
     fn test_options_builder() {
-        let options = Options::new()
-            .temperature(0.7)
-            .top_k(40)
-            .top_p(0.9)
-            .num_predict(100);
+        let options = Options::new().temperature(0.7).top_k(40).top_p(0.9).num_predict(100);
 
         assert_eq!(options.temperature, Some(0.7));
         assert_eq!(options.top_k, Some(40));
@@ -478,15 +470,10 @@ mod tests {
         // Test ToolChoice::Specific
         let specific_choice = ToolChoice::Specific {
             tool_type: "function".to_string(),
-            function: crate::models::chat::FunctionChoice {
-                name: "my_function".to_string(),
-            },
+            function: crate::models::chat::FunctionChoice { name: "my_function".to_string() },
         };
         match specific_choice {
-            ToolChoice::Specific {
-                tool_type,
-                function,
-            } => {
+            ToolChoice::Specific { tool_type, function } => {
                 assert_eq!(tool_type, "function");
                 assert_eq!(function.name, "my_function");
             }
@@ -509,9 +496,7 @@ mod tests {
         // Test Specific serialization
         let specific_choice = ToolChoice::Specific {
             tool_type: "function".to_string(),
-            function: crate::models::chat::FunctionChoice {
-                name: "my_function".to_string(),
-            },
+            function: crate::models::chat::FunctionChoice { name: "my_function".to_string() },
         };
         let json = serde_json::to_string(&specific_choice).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
@@ -534,10 +519,7 @@ mod tests {
         // Test with number (should remain number)
         let json = r#"{"name": "test", "arguments": 42}"#;
         let function_call: FunctionCall = serde_json::from_str(json).unwrap();
-        assert_eq!(
-            function_call.arguments,
-            Value::Number(serde_json::Number::from(42))
-        );
+        assert_eq!(function_call.arguments, Value::Number(serde_json::Number::from(42)));
 
         // Test with boolean (should remain boolean)
         let json = r#"{"name": "test", "arguments": true}"#;

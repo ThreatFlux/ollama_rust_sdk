@@ -68,11 +68,7 @@ pub struct EmbedRequest {
 impl EmbedRequest {
     /// Create a new embedding request
     pub fn new<S: Into<String>, I: Into<EmbedInput>>(model: S, input: I) -> Self {
-        Self {
-            model: model.into(),
-            input: input.into(),
-            ..Default::default()
-        }
+        Self { model: model.into(), input: input.into(), ..Default::default() }
     }
 
     /// Set additional options
@@ -171,12 +167,8 @@ impl EmbedResponse {
             return None;
         }
 
-        let distance: f64 = a
-            .iter()
-            .zip(b.iter())
-            .map(|(x, y)| (x - y).powi(2))
-            .sum::<f64>()
-            .sqrt();
+        let distance: f64 =
+            a.iter().zip(b.iter()).map(|(x, y)| (x - y).powi(2)).sum::<f64>().sqrt();
 
         Some(distance)
     }

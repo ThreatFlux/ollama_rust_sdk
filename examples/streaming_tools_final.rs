@@ -55,13 +55,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let messages = vec![ChatMessage::user("What's the weather in Tokyo?")];
 
-    let mut stream = client
-        .chat()
-        .model("gpt-oss:20b")
-        .messages(messages)
-        .tools(tools.clone())
-        .stream()
-        .await?;
+    let mut stream =
+        client.chat().model("gpt-oss:20b").messages(messages).tools(tools.clone()).stream().await?;
 
     let start = Instant::now();
     let mut chunks = 0;
@@ -83,11 +78,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    println!(
-        "\n✅ Received {} chunks in {:.2}s",
-        chunks,
-        start.elapsed().as_secs_f64()
-    );
+    println!("\n✅ Received {} chunks in {:.2}s", chunks, start.elapsed().as_secs_f64());
 
     if !tool_calls.is_empty() {
         println!("✅ Tool calls received via streaming:");
@@ -105,18 +96,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let messages = vec![ChatMessage::user("Calculate 99 * 88")];
 
     let start = Instant::now();
-    let response = client
-        .chat()
-        .model("gpt-oss:20b")
-        .messages(messages)
-        .tools(tools.clone())
-        .send()
-        .await?;
+    let response =
+        client.chat().model("gpt-oss:20b").messages(messages).tools(tools.clone()).send().await?;
 
-    println!(
-        "✅ Non-streaming response in {:.2}s",
-        start.elapsed().as_secs_f64()
-    );
+    println!("✅ Non-streaming response in {:.2}s", start.elapsed().as_secs_f64());
 
     if let Some(tool_calls) = response.message.tool_calls {
         println!("✅ Tool calls received:");
@@ -162,22 +145,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Non-streaming
     let start = Instant::now();
-    let _ = client
-        .chat()
-        .model("gpt-oss:20b")
-        .messages(test_message)
-        .tools(tools)
-        .send()
-        .await?;
+    let _ = client.chat().model("gpt-oss:20b").messages(test_message).tools(tools).send().await?;
 
     let non_stream_total = start.elapsed();
 
     println!("📊 Performance Results:");
     println!("  Streaming:");
-    println!(
-        "    - Time to first chunk: {:.3}s",
-        first_chunk_time.unwrap().as_secs_f64()
-    );
+    println!("    - Time to first chunk: {:.3}s", first_chunk_time.unwrap().as_secs_f64());
     println!("    - Total time: {:.3}s", stream_total.as_secs_f64());
     println!("    - Chunks received: {}", chunk_count);
     println!("  Non-streaming:");

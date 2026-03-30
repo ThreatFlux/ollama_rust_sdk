@@ -17,9 +17,8 @@ pub struct HttpClient {
 impl HttpClient {
     /// Create a new HTTP client with the given configuration
     pub fn new(config: ClientConfig) -> Result<Self> {
-        let mut client_builder = Client::builder()
-            .timeout(config.timeout)
-            .user_agent(&config.user_agent);
+        let mut client_builder =
+            Client::builder().timeout(config.timeout).user_agent(&config.user_agent);
 
         if config.follow_redirects {
             client_builder = client_builder.redirect(reqwest::redirect::Policy::limited(10));
@@ -44,28 +43,19 @@ impl HttpClient {
     /// Make a POST request
     pub fn post(&self, path: &str) -> PostRequestBuilder<'_> {
         let url = self.config.endpoint_url(path).expect("Valid URL");
-        PostRequestBuilder {
-            request: self.client.post(url),
-            http_client: self,
-        }
+        PostRequestBuilder { request: self.client.post(url), http_client: self }
     }
 
     /// Make a PUT request
     pub fn put(&self, path: &str) -> PutRequestBuilder<'_> {
         let url = self.config.endpoint_url(path).expect("Valid URL");
-        PutRequestBuilder {
-            request: self.client.put(url),
-            http_client: self,
-        }
+        PutRequestBuilder { request: self.client.put(url), http_client: self }
     }
 
     /// Make a DELETE request
     pub fn delete(&self, path: &str) -> DeleteRequestBuilder<'_> {
         let url = self.config.endpoint_url(path).expect("Valid URL");
-        DeleteRequestBuilder {
-            request: self.client.delete(url),
-            http_client: self,
-        }
+        DeleteRequestBuilder { request: self.client.delete(url), http_client: self }
     }
 
     /// Make a HEAD request
@@ -86,11 +76,7 @@ impl HttpClient {
         request = request.header("Content-Type", "application/json");
 
         let response = request.send().await.map_err(|e| {
-            if e.is_timeout() {
-                OllamaError::Timeout
-            } else {
-                OllamaError::NetworkError(e)
-            }
+            if e.is_timeout() { OllamaError::Timeout } else { OllamaError::NetworkError(e) }
         })?;
 
         Ok(response)
@@ -204,9 +190,7 @@ mod tests {
     #[test]
     fn test_config_with_custom_headers() {
         let mut config = ClientConfig::default();
-        config
-            .headers
-            .insert("X-Test".to_string(), "value".to_string());
+        config.headers.insert("X-Test".to_string(), "value".to_string());
 
         let client = HttpClient::new(config);
         assert!(client.is_ok());

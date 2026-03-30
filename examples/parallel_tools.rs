@@ -129,11 +129,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Get available model
     let models = client.list_models().await?;
-    let model = models
-        .models
-        .first()
-        .map(|m| m.name.as_str())
-        .unwrap_or("llama3:latest");
+    let model = models.models.first().map(|m| m.name.as_str()).unwrap_or("llama3:latest");
 
     println!("Using model: {}\n", model);
 
@@ -147,14 +143,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ChatMessage::user("Search for 'user_data' across all available sources"),
     ];
 
-    match client
-        .chat()
-        .model(model)
-        .messages(messages.clone())
-        .tools(tools.clone())
-        .send()
-        .await
-    {
+    match client.chat().model(model).messages(messages.clone()).tools(tools.clone()).send().await {
         Ok(response) => {
             println!("Assistant: {}\n", response.message.content);
 
@@ -236,18 +225,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Show the results
     println!("\n📦 Parallel Results:");
-    println!(
-        "  Result 1: {} bytes",
-        serde_json::to_string(&results.0)?.len()
-    );
-    println!(
-        "  Result 2: {} bytes",
-        serde_json::to_string(&results.1)?.len()
-    );
-    println!(
-        "  Result 3: {} bytes",
-        serde_json::to_string(&results.2)?.len()
-    );
+    println!("  Result 1: {} bytes", serde_json::to_string(&results.0)?.len());
+    println!("  Result 2: {} bytes", serde_json::to_string(&results.1)?.len());
+    println!("  Result 3: {} bytes", serde_json::to_string(&results.2)?.len());
 
     Ok(())
 }

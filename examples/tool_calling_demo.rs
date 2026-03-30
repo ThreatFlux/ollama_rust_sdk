@@ -133,13 +133,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             ChatMessage::user(query),
         ];
 
-        let response = client
-            .chat()
-            .model(model)
-            .messages(messages)
-            .tools(tools.clone())
-            .send()
-            .await?;
+        let response =
+            client.chat().model(model).messages(messages).tools(tools.clone()).send().await?;
 
         if !response.message.content.is_empty() {
             println!("💭 Thinking: {}", response.message.content);
@@ -161,10 +156,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         get_weather(location)
                     }
                     "calculate" => {
-                        let expr = args
-                            .get("expression")
-                            .and_then(|value| value.as_str())
-                            .unwrap_or("0");
+                        let expr =
+                            args.get("expression").and_then(|value| value.as_str()).unwrap_or("0");
                         calculate(expr)
                     }
                     _ => "Unknown function".to_string(),

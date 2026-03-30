@@ -32,13 +32,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ];
 
     println!("Sending request with tool...");
-    let response = client
-        .chat()
-        .model("gpt-oss:20b")
-        .messages(messages)
-        .tools(vec![calc_tool])
-        .send()
-        .await?;
+    let response =
+        client.chat().model("gpt-oss:20b").messages(messages).tools(vec![calc_tool]).send().await?;
 
     println!("Response content: {}", response.message.content);
 

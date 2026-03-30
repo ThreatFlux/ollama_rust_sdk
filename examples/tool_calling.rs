@@ -26,9 +26,8 @@ fn get_weather(location: &str, unit: &str) -> serde_json::Value {
     .collect();
 
     // Convert unit if needed
-    let (condition, temp, temp_unit) = weather_data
-        .get(location)
-        .unwrap_or(&("unknown", 20, "celsius"));
+    let (condition, temp, temp_unit) =
+        weather_data.get(location).unwrap_or(&("unknown", 20, "celsius"));
 
     let temperature = if unit.to_lowercase() == "celsius" && *temp_unit == "fahrenheit" {
         (*temp - 32) * 5 / 9
@@ -60,9 +59,7 @@ fn get_stock_price(symbol: &str) -> serde_json::Value {
     .cloned()
     .collect();
 
-    let (price, change, direction) = stock_prices
-        .get(symbol)
-        .unwrap_or(&(100.0, 0.0, "unchanged"));
+    let (price, change, direction) = stock_prices.get(symbol).unwrap_or(&(100.0, 0.0, "unchanged"));
 
     json!({
         "symbol": symbol,
@@ -113,11 +110,7 @@ fn calculate(expression: &str) -> serde_json::Value {
             if parts.len() == 2 {
                 let a: f64 = parts[0].trim().parse().unwrap_or(0.0);
                 let b: f64 = parts[1].trim().parse().unwrap_or(1.0);
-                if b != 0.0 {
-                    a / b
-                } else {
-                    0.0
-                }
+                if b != 0.0 { a / b } else { 0.0 }
             } else {
                 0.0
             }
@@ -139,28 +132,17 @@ fn process_tool_call(tool_call: &ToolCall) -> String {
     let args = &tool_call.function.arguments;
     let result = match tool_call.function.name.as_str() {
         "get_weather" => {
-            let location = args
-                .get("location")
-                .and_then(|value| value.as_str())
-                .unwrap_or("Unknown");
-            let unit = args
-                .get("unit")
-                .and_then(|value| value.as_str())
-                .unwrap_or("celsius");
+            let location =
+                args.get("location").and_then(|value| value.as_str()).unwrap_or("Unknown");
+            let unit = args.get("unit").and_then(|value| value.as_str()).unwrap_or("celsius");
             get_weather(location, unit)
         }
         "get_stock_price" => {
-            let symbol = args
-                .get("symbol")
-                .and_then(|value| value.as_str())
-                .unwrap_or("UNKNOWN");
+            let symbol = args.get("symbol").and_then(|value| value.as_str()).unwrap_or("UNKNOWN");
             get_stock_price(symbol)
         }
         "calculate" => {
-            let expression = args
-                .get("expression")
-                .and_then(|value| value.as_str())
-                .unwrap_or("0");
+            let expression = args.get("expression").and_then(|value| value.as_str()).unwrap_or("0");
             calculate(expression)
         }
         _ => json!({"error": "Unknown function"}),
@@ -306,7 +288,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let mut messages = vec![
             ChatMessage::system(
-                "You are a helpful assistant with access to tools. Use them when needed to answer questions accurately."
+                "You are a helpful assistant with access to tools. Use them when needed to answer questions accurately.",
             ),
             ChatMessage::user(query),
         ];

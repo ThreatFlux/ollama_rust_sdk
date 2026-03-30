@@ -92,13 +92,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = OllamaClient::new(&cli.url)?;
 
     match cli.command {
-        Commands::Generate {
-            prompt,
-            model,
-            stream,
-            temperature,
-            max_tokens,
-        } => {
+        Commands::Generate { prompt, model, stream, temperature, max_tokens } => {
             handle_generate(client, prompt, model, stream, temperature, max_tokens).await?;
         }
         Commands::Chat { model, system } => {
@@ -203,12 +197,7 @@ async fn handle_embed(
     texts: Vec<String>,
     model: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let response = client
-        .embed()
-        .model(&model)
-        .input(texts.clone())
-        .send()
-        .await?;
+    let response = client.embed().model(&model).input(texts.clone()).send().await?;
 
     println!("Generated {} embeddings:", response.embeddings.len());
     for (i, text) in texts.iter().enumerate() {

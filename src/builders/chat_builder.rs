@@ -23,10 +23,7 @@ impl ChatBuilder {
     /// Create a new chat builder
     #[must_use]
     pub fn new(http_client: Arc<HttpClient>) -> Self {
-        Self {
-            http_client,
-            request: ChatRequest::default(),
-        }
+        Self { http_client, request: ChatRequest::default() }
     }
 
     /// Set the model to use
@@ -179,14 +176,8 @@ mod tests {
 
         assert_eq!(builder.request.model, "test-model");
         assert_eq!(builder.request.messages.len(), 2);
-        assert_eq!(
-            builder.request.messages[0].role,
-            crate::models::chat::MessageRole::System
-        );
-        assert_eq!(
-            builder.request.messages[1].role,
-            crate::models::chat::MessageRole::User
-        );
+        assert_eq!(builder.request.messages[0].role, crate::models::chat::MessageRole::System);
+        assert_eq!(builder.request.messages[1].role, crate::models::chat::MessageRole::User);
 
         let options = builder.request.options.unwrap();
         assert_eq!(options.temperature, Some(0.7));
@@ -253,20 +244,13 @@ mod tests {
 
         // Test specific tool choice
         let builder_specific =
-            ChatBuilder::new(http_client)
-                .model("test")
-                .tool_choice(ToolChoice::Specific {
-                    tool_type: "function".to_string(),
-                    function: FunctionChoice {
-                        name: "my_function".to_string(),
-                    },
-                });
+            ChatBuilder::new(http_client).model("test").tool_choice(ToolChoice::Specific {
+                tool_type: "function".to_string(),
+                function: FunctionChoice { name: "my_function".to_string() },
+            });
 
         match builder_specific.request.tool_choice {
-            Some(ToolChoice::Specific {
-                tool_type,
-                function,
-            }) => {
+            Some(ToolChoice::Specific { tool_type, function }) => {
                 assert_eq!(tool_type, "function");
                 assert_eq!(function.name, "my_function");
             }

@@ -34,10 +34,8 @@ impl ChatApi {
             });
         }
 
-        let chat_response: ChatResponse = response
-            .json()
-            .await
-            .map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
+        let chat_response: ChatResponse =
+            response.json().await.map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
 
         Ok(chat_response)
     }
@@ -49,7 +47,7 @@ impl ChatApi {
     pub async fn chat_stream(
         http_client: &Arc<HttpClient>,
         mut request: ChatRequest,
-    ) -> Result<impl tokio_stream::Stream<Item = Result<ChatResponse>>> {
+    ) -> Result<impl tokio_stream::Stream<Item = Result<ChatResponse>> + use<>> {
         request.stream = Some(true);
 
         let response = http_client.post("api/chat").json(&request).send().await?;
@@ -76,14 +74,12 @@ impl ChatApi {
                             Err(e) => {
                                 return Err(OllamaError::InvalidResponse(format!(
                                     "Failed to parse chunk: {e} - Line: {line}"
-                                )))
+                                )));
                             }
                         }
                     }
                 }
-                Err(OllamaError::InvalidResponse(
-                    "Empty or invalid chunk".to_string(),
-                ))
+                Err(OllamaError::InvalidResponse("Empty or invalid chunk".to_string()))
             }
             Err(e) => Err(OllamaError::StreamError(e.to_string())),
         });

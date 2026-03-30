@@ -29,10 +29,8 @@ impl ModelsApi {
             });
         }
 
-        let model_list: ModelList = response
-            .json()
-            .await
-            .map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
+        let model_list: ModelList =
+            response.json().await.map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
 
         Ok(model_list)
     }
@@ -42,10 +40,7 @@ impl ModelsApi {
     /// # Errors
     /// Returns an error if the HTTP request fails, the model is not found, or the server returns an error.
     pub async fn show_model(http_client: &Arc<HttpClient>, name: &str) -> Result<ModelInfo> {
-        let request = ShowRequest {
-            name: name.to_string(),
-            verbose: Some(false),
-        };
+        let request = ShowRequest { name: name.to_string(), verbose: Some(false) };
 
         let response = http_client.post("api/show").json(&request).send().await?;
 
@@ -60,10 +55,8 @@ impl ModelsApi {
             });
         }
 
-        let model_info: ModelInfo = response
-            .json()
-            .await
-            .map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
+        let model_info: ModelInfo =
+            response.json().await.map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
 
         Ok(model_info)
     }
@@ -73,11 +66,7 @@ impl ModelsApi {
     /// # Errors
     /// Returns an error if the HTTP request fails or the server returns an error.
     pub async fn pull_model(http_client: &Arc<HttpClient>, name: &str, stream: bool) -> Result<()> {
-        let request = PullRequest {
-            name: name.to_string(),
-            stream: Some(stream),
-            insecure: None,
-        };
+        let request = PullRequest { name: name.to_string(), stream: Some(stream), insecure: None };
 
         let response = http_client.post("api/pull").json(&request).send().await?;
 
@@ -89,10 +78,8 @@ impl ModelsApi {
         }
 
         if !stream {
-            let _: serde_json::Value = response
-                .json()
-                .await
-                .map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
+            let _: serde_json::Value =
+                response.json().await.map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
         }
 
         Ok(())
@@ -103,11 +90,7 @@ impl ModelsApi {
         http_client: &Arc<HttpClient>,
         name: &str,
     ) -> Result<impl tokio_stream::Stream<Item = Result<serde_json::Value>>> {
-        let request = PullRequest {
-            name: name.to_string(),
-            stream: Some(true),
-            insecure: None,
-        };
+        let request = PullRequest { name: name.to_string(), stream: Some(true), insecure: None };
 
         let response = http_client.post("api/pull").json(&request).send().await?;
 
@@ -210,10 +193,8 @@ impl ModelsApi {
         source: &str,
         destination: &str,
     ) -> Result<()> {
-        let request = CopyRequest {
-            source: source.to_string(),
-            destination: destination.to_string(),
-        };
+        let request =
+            CopyRequest { source: source.to_string(), destination: destination.to_string() };
 
         let response = http_client.post("api/copy").json(&request).send().await?;
 
@@ -233,15 +214,9 @@ impl ModelsApi {
 
     /// Delete a model
     pub async fn delete_model(http_client: &Arc<HttpClient>, name: &str) -> Result<()> {
-        let request = DeleteRequest {
-            name: name.to_string(),
-        };
+        let request = DeleteRequest { name: name.to_string() };
 
-        let response = http_client
-            .delete("api/delete")
-            .json(&request)
-            .send()
-            .await?;
+        let response = http_client.delete("api/delete").json(&request).send().await?;
 
         if !response.status().is_success() {
             let status = response.status().as_u16();
@@ -268,10 +243,8 @@ impl ModelsApi {
             });
         }
 
-        let running_models: RunningModels = response
-            .json()
-            .await
-            .map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
+        let running_models: RunningModels =
+            response.json().await.map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
 
         Ok(running_models)
     }
@@ -282,17 +255,14 @@ mod tests {
     use super::*;
     use crate::config::ClientConfig;
     use wiremock::{
-        matchers::{body_json, method, path},
         Mock, MockServer, ResponseTemplate,
+        matchers::{body_json, method, path},
     };
 
     #[test]
     fn test_pull_request_creation() {
-        let request = PullRequest {
-            name: "test-model".to_string(),
-            stream: Some(true),
-            insecure: None,
-        };
+        let request =
+            PullRequest { name: "test-model".to_string(), stream: Some(true), insecure: None };
 
         assert_eq!(request.name, "test-model");
         assert_eq!(request.stream, Some(true));
@@ -384,10 +354,7 @@ mod tests {
 
         let result = ModelsApi::list_models(&http_client).await;
         assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            OllamaError::InvalidResponse(_)
-        ));
+        assert!(matches!(result.unwrap_err(), OllamaError::InvalidResponse(_)));
     }
 
     #[tokio::test]
@@ -408,10 +375,8 @@ mod tests {
             }
         }"#;
 
-        let expected_request = ShowRequest {
-            name: "llama3:latest".to_string(),
-            verbose: Some(false),
-        };
+        let expected_request =
+            ShowRequest { name: "llama3:latest".to_string(), verbose: Some(false) };
 
         Mock::given(method("POST"))
             .and(path("/api/show"))
@@ -426,9 +391,7 @@ mod tests {
         };
         let http_client = Arc::new(HttpClient::new(config).unwrap());
 
-        let result = ModelsApi::show_model(&http_client, "llama3:latest")
-            .await
-            .unwrap();
+        let result = ModelsApi::show_model(&http_client, "llama3:latest").await.unwrap();
         assert_eq!(result.modelfile, Some("FROM llama3:latest".to_string()));
         assert_eq!(result.parameters, Some("temperature 0.7".to_string()));
     }
@@ -437,10 +400,8 @@ mod tests {
     async fn test_show_model_not_found() {
         let mock_server = MockServer::start().await;
 
-        let expected_request = ShowRequest {
-            name: "nonexistent:model".to_string(),
-            verbose: Some(false),
-        };
+        let expected_request =
+            ShowRequest { name: "nonexistent:model".to_string(), verbose: Some(false) };
 
         Mock::given(method("POST"))
             .and(path("/api/show"))
@@ -464,11 +425,8 @@ mod tests {
     async fn test_pull_model_success() {
         let mock_server = MockServer::start().await;
 
-        let expected_request = PullRequest {
-            name: "llama3:latest".to_string(),
-            stream: Some(false),
-            insecure: None,
-        };
+        let expected_request =
+            PullRequest { name: "llama3:latest".to_string(), stream: Some(false), insecure: None };
 
         Mock::given(method("POST"))
             .and(path("/api/pull"))
@@ -491,11 +449,8 @@ mod tests {
     async fn test_pull_model_stream() {
         let mock_server = MockServer::start().await;
 
-        let expected_request = PullRequest {
-            name: "llama3:latest".to_string(),
-            stream: Some(true),
-            insecure: None,
-        };
+        let expected_request =
+            PullRequest { name: "llama3:latest".to_string(), stream: Some(true), insecure: None };
 
         Mock::given(method("POST"))
             .and(path("/api/pull"))
@@ -626,9 +581,7 @@ mod tests {
     async fn test_delete_model_success() {
         let mock_server = MockServer::start().await;
 
-        let expected_request = DeleteRequest {
-            name: "llama3:backup".to_string(),
-        };
+        let expected_request = DeleteRequest { name: "llama3:backup".to_string() };
 
         Mock::given(method("DELETE"))
             .and(path("/api/delete"))
@@ -777,19 +730,14 @@ mod tests {
 
     #[test]
     fn test_delete_request_creation() {
-        let request = DeleteRequest {
-            name: "model-to-delete".to_string(),
-        };
+        let request = DeleteRequest { name: "model-to-delete".to_string() };
 
         assert_eq!(request.name, "model-to-delete");
     }
 
     #[test]
     fn test_show_request_creation() {
-        let request = ShowRequest {
-            name: "model-to-show".to_string(),
-            verbose: Some(true),
-        };
+        let request = ShowRequest { name: "model-to-show".to_string(), verbose: Some(true) };
 
         assert_eq!(request.name, "model-to-show");
         assert_eq!(request.verbose, Some(true));

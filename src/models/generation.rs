@@ -52,11 +52,7 @@ pub struct GenerateRequest {
 impl GenerateRequest {
     /// Create a new generate request
     pub fn new<S: Into<String>>(model: S, prompt: S) -> Self {
-        Self {
-            model: model.into(),
-            prompt: prompt.into(),
-            ..Default::default()
-        }
+        Self { model: model.into(), prompt: prompt.into(), ..Default::default() }
     }
 
     /// Set whether to stream the response
@@ -183,10 +179,7 @@ mod tests {
             .format(ResponseFormat::Json);
 
         assert_eq!(request.stream, Some(true));
-        assert_eq!(
-            request.system,
-            Some("You are a helpful assistant".to_string())
-        );
+        assert_eq!(request.system, Some("You are a helpful assistant".to_string()));
         matches!(request.format, Some(ResponseFormat::Json));
     }
 

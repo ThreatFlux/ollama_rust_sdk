@@ -43,10 +43,7 @@ impl ClientConfig {
         let base_url = Url::parse(base_url.as_ref())
             .map_err(|e| OllamaError::ConfigError(format!("Invalid base URL: {}", e)))?;
 
-        Ok(Self {
-            base_url,
-            ..Default::default()
-        })
+        Ok(Self { base_url, ..Default::default() })
     }
 
     /// Create a builder for client configuration
@@ -56,11 +53,7 @@ impl ClientConfig {
 
     /// Get the full URL for an API endpoint
     pub fn endpoint_url(&self, path: &str) -> Result<Url> {
-        let path = if path.starts_with('/') {
-            path
-        } else {
-            &format!("/{}", path)
-        };
+        let path = if path.starts_with('/') { path } else { &format!("/{}", path) };
 
         self.base_url.join(path).map_err(|e| {
             OllamaError::ConfigError(format!("Invalid endpoint path '{}': {}", path, e))
@@ -138,18 +131,10 @@ impl ClientConfigBuilder {
 
         Ok(ClientConfig {
             base_url,
-            timeout: self
-                .timeout
-                .unwrap_or_else(|| ClientConfig::default().timeout),
-            user_agent: self
-                .user_agent
-                .unwrap_or_else(|| ClientConfig::default().user_agent),
-            max_retries: self
-                .max_retries
-                .unwrap_or_else(|| ClientConfig::default().max_retries),
-            retry_delay: self
-                .retry_delay
-                .unwrap_or_else(|| ClientConfig::default().retry_delay),
+            timeout: self.timeout.unwrap_or_else(|| ClientConfig::default().timeout),
+            user_agent: self.user_agent.unwrap_or_else(|| ClientConfig::default().user_agent),
+            max_retries: self.max_retries.unwrap_or_else(|| ClientConfig::default().max_retries),
+            retry_delay: self.retry_delay.unwrap_or_else(|| ClientConfig::default().retry_delay),
             follow_redirects: self
                 .follow_redirects
                 .unwrap_or_else(|| ClientConfig::default().follow_redirects),

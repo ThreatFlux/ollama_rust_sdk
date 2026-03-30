@@ -34,10 +34,7 @@ impl OllamaClient {
     pub fn with_config(config: ClientConfig) -> Result<Self> {
         let http_client = HttpClient::new(config.clone())?;
 
-        Ok(Self {
-            http_client: Arc::new(http_client),
-            config: Arc::new(config),
-        })
+        Ok(Self { http_client: Arc::new(http_client), config: Arc::new(config) })
     }
 
     /// Create a new Ollama client using environment variables.
@@ -62,10 +59,10 @@ impl OllamaClient {
             builder = builder.timeout(Duration::from_secs(timeout_secs));
         }
 
-        if let Ok(user_agent) = env::var("OLLAMA_USER_AGENT") {
-            if !user_agent.trim().is_empty() {
-                builder = builder.user_agent(user_agent);
-            }
+        if let Ok(user_agent) = env::var("OLLAMA_USER_AGENT")
+            && !user_agent.trim().is_empty()
+        {
+            builder = builder.user_agent(user_agent);
         }
 
         if let Ok(headers_raw) = env::var("OLLAMA_API_HEADERS") {
@@ -94,10 +91,8 @@ impl OllamaClient {
     /// Get the Ollama server version
     pub async fn version(&self) -> Result<serde_json::Value> {
         let response = self.http_client.get("api/version").await?;
-        let json: serde_json::Value = response
-            .json()
-            .await
-            .map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
+        let json: serde_json::Value =
+            response.json().await.map_err(|e| OllamaError::InvalidResponse(e.to_string()))?;
         Ok(json)
     }
 
@@ -198,10 +193,7 @@ pub struct EmbedRequestBuilder {
 
 impl EmbedRequestBuilder {
     fn new(http_client: Arc<HttpClient>) -> Self {
-        Self {
-            http_client,
-            request: EmbedRequest::default(),
-        }
+        Self { http_client, request: EmbedRequest::default() }
     }
 
     /// Set the model to use for embeddings
@@ -278,8 +270,8 @@ mod tests {
     use super::*;
     use crate::models::common::{KeepAlive, Options};
     use wiremock::{
-        matchers::{method, path},
         Mock, MockServer, ResponseTemplate,
+        matchers::{method, path},
     };
 
     #[test]
@@ -404,10 +396,7 @@ mod tests {
         let result = client.version().await;
 
         assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            OllamaError::InvalidResponse(_)
-        ));
+        assert!(matches!(result.unwrap_err(), OllamaError::InvalidResponse(_)));
     }
 
     #[test]
@@ -469,9 +458,8 @@ mod tests {
         let http_client = Arc::new(HttpClient::new(config.clone()).unwrap());
 
         // Test with string input
-        let builder1 = EmbedRequestBuilder::new(http_client.clone())
-            .model("test-model")
-            .input("single text");
+        let builder1 =
+            EmbedRequestBuilder::new(http_client.clone()).model("test-model").input("single text");
 
         // Test with vec input
         let builder2 = EmbedRequestBuilder::new(http_client)

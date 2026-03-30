@@ -56,13 +56,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ];
 
     println!("Sending streaming request with tools...");
-    let mut stream = client
-        .chat()
-        .model("gpt-oss:20b")
-        .messages(messages)
-        .tools(tools.clone())
-        .stream()
-        .await?;
+    let mut stream =
+        client.chat().model("gpt-oss:20b").messages(messages).tools(tools.clone()).stream().await?;
 
     let mut full_response = String::new();
     let mut tool_calls = Vec::new();
@@ -113,13 +108,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ];
 
     println!("Sending request for multiple tool calls...");
-    let mut stream = client
-        .chat()
-        .model("gpt-oss:20b")
-        .messages(messages)
-        .tools(tools.clone())
-        .stream()
-        .await?;
+    let mut stream =
+        client.chat().model("gpt-oss:20b").messages(messages).tools(tools.clone()).stream().await?;
 
     let mut chunks_received = 0;
     let mut tool_calls = Vec::new();
@@ -152,16 +142,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let args = &call.function.arguments;
         if call.function.name == "get_weather" {
-            let location = args
-                .get("location")
-                .and_then(|value| value.as_str())
-                .unwrap_or("?");
+            let location = args.get("location").and_then(|value| value.as_str()).unwrap_or("?");
             println!("    Location: {}", location);
         } else if call.function.name == "calculate" {
-            let expression = args
-                .get("expression")
-                .and_then(|value| value.as_str())
-                .unwrap_or("?");
+            let expression = args.get("expression").and_then(|value| value.as_str()).unwrap_or("?");
             println!("    Expression: {}", expression);
         }
     }
@@ -174,12 +158,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let messages = vec![ChatMessage::user("Tell me a very short joke")];
 
-    let mut stream = client
-        .chat()
-        .model("gpt-oss:20b")
-        .messages(messages)
-        .stream()
-        .await?;
+    let mut stream = client.chat().model("gpt-oss:20b").messages(messages).stream().await?;
 
     print!("Response: ");
     while let Some(chunk) = stream.next().await {

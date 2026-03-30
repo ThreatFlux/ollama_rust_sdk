@@ -42,11 +42,11 @@ fn calculate(expr: &str) -> String {
 
 async fn stream_and_collect(
     mut stream: impl StreamExt<
-            Item = Result<
-                ollama_rust_sdk::models::chat::ChatResponse,
-                ollama_rust_sdk::error::OllamaError,
-            >,
-        > + Unpin,
+        Item = Result<
+            ollama_rust_sdk::models::chat::ChatResponse,
+            ollama_rust_sdk::error::OllamaError,
+        >,
+    > + Unpin,
 ) -> Result<(String, Vec<ollama_rust_sdk::models::common::ToolCall>), Box<dyn std::error::Error>> {
     let mut content = String::new();
     let mut tool_calls = Vec::new();
@@ -68,11 +68,7 @@ async fn stream_and_collect(
 
         if response.done {
             let elapsed = start.elapsed();
-            println!(
-                "\n  [Streamed {} chunks in {:.2}s]",
-                chunk_count,
-                elapsed.as_secs_f64()
-            );
+            println!("\n  [Streamed {} chunks in {:.2}s]", chunk_count, elapsed.as_secs_f64());
             break;
         }
     }
@@ -125,7 +121,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", "-".repeat(50));
 
     let mut messages = vec![
-        ChatMessage::system("You are a helpful assistant with weather and calculation tools. Always use tools when asked about weather or math."),
+        ChatMessage::system(
+            "You are a helpful assistant with weather and calculation tools. Always use tools when asked about weather or math.",
+        ),
         ChatMessage::user("What's the weather in London and Paris, and calculate 42 * 17?"),
     ];
 
@@ -154,18 +152,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let args = &call.function.arguments;
             let result = match call.function.name.as_str() {
                 "get_weather" => {
-                    let location = args
-                        .get("location")
-                        .and_then(|value| value.as_str())
-                        .unwrap_or("Unknown");
+                    let location =
+                        args.get("location").and_then(|value| value.as_str()).unwrap_or("Unknown");
                     println!("  📍 Getting weather for: {}", location);
                     get_weather(location)
                 }
                 "calculate" => {
-                    let expr = args
-                        .get("expression")
-                        .and_then(|value| value.as_str())
-                        .unwrap_or("0");
+                    let expr =
+                        args.get("expression").and_then(|value| value.as_str()).unwrap_or("0");
                     println!("  🧮 Calculating: {}", expr);
                     calculate(expr)
                 }
@@ -208,13 +202,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ];
 
     println!("\n🤖 Assistant:");
-    let stream = client
-        .chat()
-        .model("gpt-oss:20b")
-        .messages(messages)
-        .tools(tools)
-        .stream()
-        .await?;
+    let stream =
+        client.chat().model("gpt-oss:20b").messages(messages).tools(tools).stream().await?;
 
     let start = Instant::now();
     let (_, tool_calls) = stream_and_collect(stream).await?;

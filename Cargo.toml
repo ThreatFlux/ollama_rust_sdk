@@ -1,8 +1,8 @@
 [package]
 name = "ollama_rust_sdk"
 version = "0.1.1"
-edition = "2021"
-rust-version = "1.89"
+edition = "2024"
+rust-version = "1.94.0"
 authors = ["Your Name <your.email@example.com>"]
 description = "A comprehensive Rust SDK for interacting with the Ollama API"
 license = "MIT"
@@ -21,7 +21,7 @@ path = "src/main.rs"
 [dependencies]
 # HTTP client and async runtime
 reqwest = { version = "0.13.2", features = ["json", "stream"] }
-tokio = { version = "1.49.0", features = ["macros", "rt-multi-thread", "sync", "time"] }
+tokio = { version = "1.50.0", features = ["macros", "rt-multi-thread", "sync", "time"] }
 tokio-stream = "0.1.18"
 
 # Serialization
@@ -34,14 +34,12 @@ thiserror = "2.0.18"
 # URL parsing
 url = "2.5.8"
 
-# UUID generation
-
 # Async streaming
 futures-util = "0.3.32"
 
 # CLI support
-clap = { version = "4.5.60", features = ["derive"] }
-env_logger = "0.11.9"
+clap = { version = "4.6.0", features = ["derive"] }
+env_logger = "0.11.10"
 log = "0.4.29"
 
 # Additional dependencies for examples
@@ -56,17 +54,23 @@ tracing = { version = "0.1.44", optional = true }
 [dev-dependencies]
 tokio-test = "0.4.5"
 wiremock = "0.6.5"
-tempfile = "3.25.0"
+tempfile = "3.27.0"
 mockall = "0.14.0"
 rstest = "0.26.1"
 assert-json-diff = "2.0.2"
 pretty_assertions = "1.4.1"
-uuid = { version = "1.21.0", features = ["serde", "v4"] }
+uuid = { version = "1.23.0", features = ["serde", "v4"] }
 
 [features]
 default = ["tls"]
 tls = ["reqwest/rustls", "dep:rustls"]
 tracing = ["dep:tracing"]
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
 
 [package.metadata.docs.rs]
 all-features = true

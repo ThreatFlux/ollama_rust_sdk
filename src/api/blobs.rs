@@ -21,10 +21,9 @@ impl BlobsApi {
         match response.status().as_u16() {
             200 => Ok(true),
             404 => Ok(false),
-            status => Err(OllamaError::ServerError {
-                status,
-                message: "Blob check failed".to_string(),
-            }),
+            status => {
+                Err(OllamaError::ServerError { status, message: "Blob check failed".to_string() })
+            }
         }
     }
 
@@ -61,8 +60,8 @@ mod tests {
     use super::*;
     use crate::{config::ClientConfig, utils::http::HttpClient};
     use wiremock::{
-        matchers::{method, path},
         Mock, MockServer, ResponseTemplate,
+        matchers::{method, path},
     };
 
     #[test]
