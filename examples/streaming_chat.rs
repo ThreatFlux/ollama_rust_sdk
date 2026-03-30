@@ -17,9 +17,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Get available model
     let models = client.list_models().await?;
-    let model_name = models.models.first().map(|m| m.name.as_str()).unwrap_or("qwen3:30b-a3b");
+    let model_name = models.models.first().map_or("qwen3:30b-a3b", |m| m.name.as_str());
 
-    println!("Using model: {}", model_name);
+    println!("Using model: {model_name}");
     println!("Starting streaming chat example..\n");
 
     // Create a streaming chat request
@@ -53,15 +53,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     if let Some(eval_count) = response.eval_count
                         && let Some(eval_duration) = response.eval_duration
                     {
-                        let tokens_per_second = eval_count as f64 / (eval_duration as f64 / 1e9);
-                        println!("Tokens generated: {}", eval_count);
-                        println!("Speed: {:.2} tokens/second", tokens_per_second);
+                        let tokens_per_second =
+                            f64::from(eval_count) / (eval_duration as f64 / 1e9);
+                        println!("Tokens generated: {eval_count}");
+                        println!("Speed: {tokens_per_second:.2} tokens/second");
                     }
                     break;
                 }
             }
             Err(e) => {
-                eprintln!("\nStream error: {}", e);
+                eprintln!("\nStream error: {e}");
                 break;
             }
         }

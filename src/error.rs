@@ -82,22 +82,22 @@ impl OllamaError {
     pub fn is_retryable(&self) -> bool {
         matches!(
             self,
-            OllamaError::NetworkError(_)
-                | OllamaError::Timeout
-                | OllamaError::ModelLoading(_)
-                | OllamaError::ServerError { status: 500..=599, .. }
+            Self::NetworkError(_)
+                | Self::Timeout
+                | Self::ModelLoading(_)
+                | Self::ServerError { status: 500..=599, .. }
         )
     }
 
     /// Check if the error indicates the model is not available
     pub fn is_model_unavailable(&self) -> bool {
-        matches!(self, OllamaError::ModelNotFound(_) | OllamaError::ModelLoading(_))
+        matches!(self, Self::ModelNotFound(_) | Self::ModelLoading(_))
     }
 
     /// Get the HTTP status code if this is a server error
     pub fn status_code(&self) -> Option<u16> {
         match self {
-            OllamaError::ServerError { status, .. } => Some(*status),
+            Self::ServerError { status, .. } => Some(*status),
             _ => None,
         }
     }
@@ -117,18 +117,15 @@ mod tests {
         let client = reqwest::Client::new();
         let result = client.get("http://invalid-domain-that-does-not-exist.test/").send().await;
 
-        match result {
-            Err(reqwest_error) => {
-                let ollama_error: OllamaError = reqwest_error.into();
-                assert!(matches!(ollama_error, OllamaError::NetworkError(_)));
-                assert!(ollama_error.to_string().contains("Network error"));
-                assert!(ollama_error.is_retryable());
-            }
-            Ok(_) => {
-                // If the request somehow succeeds, just test the error type directly
-                let test_error = OllamaError::Timeout;
-                assert!(test_error.is_retryable());
-            }
+        if let Err(reqwest_error) = result {
+            let ollama_error: OllamaError = reqwest_error.into();
+            assert!(matches!(ollama_error, OllamaError::NetworkError(_)));
+            assert!(ollama_error.to_string().contains("Network error"));
+            assert!(ollama_error.is_retryable());
+        } else {
+            // If the request somehow succeeds, just test the error type directly
+            let test_error = OllamaError::Timeout;
+            assert!(test_error.is_retryable());
         }
     }
 
@@ -293,7 +290,7 @@ mod tests {
     #[test]
     fn test_debug_formatting() {
         let error = OllamaError::ModelNotFound("test-model".to_string());
-        let debug_str = format!("{:?}", error);
+        let debug_str = format!("{error:?}");
 
         assert!(debug_str.contains("ModelNotFound"));
         assert!(debug_str.contains("test-model"));

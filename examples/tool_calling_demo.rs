@@ -17,13 +17,13 @@ fn get_weather(location: &str) -> String {
         ("Paris", "Partly cloudy, 68°F"),
     ]
     .iter()
-    .cloned()
+    .copied()
     .collect();
 
-    weather
-        .get(location)
-        .map(|w| format!("Weather in {}: {}", location, w))
-        .unwrap_or_else(|| format!("Weather data not available for {}", location))
+    weather.get(location).map_or_else(
+        || format!("Weather data not available for {location}"),
+        |w| format!("Weather in {location}: {w}"),
+    )
 }
 
 /// Simple calculator
@@ -44,7 +44,7 @@ fn calculate(expr: &str) -> String {
             return format!("{} = {}", expr, a * b);
         }
     }
-    format!("Cannot calculate: {}", expr)
+    format!("Cannot calculate: {expr}")
 }
 
 #[tokio::main]
@@ -79,7 +79,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let model = &available_tool_models[0];
-    println!("✅ Using model: {}", model);
+    println!("✅ Using model: {model}");
     println!();
 
     // Define tools
@@ -123,7 +123,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ];
 
     for query in scenarios {
-        println!("📝 Query: {}", query);
+        println!("📝 Query: {query}");
         println!("{}", "-".repeat(40));
 
         let messages = vec![
@@ -163,7 +163,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     _ => "Unknown function".to_string(),
                 };
 
-                println!("  ← Result: {}", result);
+                println!("  ← Result: {result}");
             }
         } else {
             println!("📢 Direct Response: {}", response.message.content);

@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@3d8036cf7fe7433e4a725cf513a6ea56c7fd0f14 # codeql-bundle-v2.25.0
+        uses: github/codeql-action/init@0e9f55954318745b37b7933c693bc093f7336125 # v4.35.1
         with:
           languages: ${{ matrix.language }}
           queries: security-and-quality
@@ -41,6 +41,6 @@ jobs:
         run: cargo build --all-features
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@3d8036cf7fe7433e4a725cf513a6ea56c7fd0f14 # codeql-bundle-v2.25.0
+        uses: github/codeql-action/analyze@0e9f55954318745b37b7933c693bc093f7336125 # v4.35.1
         with:
           category: "/language:${{matrix.language}}"

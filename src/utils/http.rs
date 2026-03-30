@@ -26,9 +26,9 @@ impl HttpClient {
             client_builder = client_builder.redirect(reqwest::redirect::Policy::none());
         }
 
-        let client = client_builder.build().map_err(|e| {
-            OllamaError::ConfigError(format!("Failed to create HTTP client: {}", e))
-        })?;
+        let client = client_builder
+            .build()
+            .map_err(|e| OllamaError::ConfigError(format!("Failed to create HTTP client: {e}")))?;
 
         Ok(Self { client, config })
     }
@@ -89,7 +89,7 @@ pub struct PostRequestBuilder<'a> {
     http_client: &'a HttpClient,
 }
 
-impl<'a> PostRequestBuilder<'a> {
+impl PostRequestBuilder<'_> {
     /// Set JSON body
     pub fn json<T: Serialize>(mut self, json: &T) -> Self {
         self.request = self.request.json(json);
@@ -130,7 +130,7 @@ pub struct DeleteRequestBuilder<'a> {
     http_client: &'a HttpClient,
 }
 
-impl<'a> PutRequestBuilder<'a> {
+impl PutRequestBuilder<'_> {
     /// Set raw body
     pub fn body<T: Into<reqwest::Body>>(mut self, body: T) -> Self {
         self.request = self.request.body(body);
@@ -153,7 +153,7 @@ impl<'a> PutRequestBuilder<'a> {
     }
 }
 
-impl<'a> DeleteRequestBuilder<'a> {
+impl DeleteRequestBuilder<'_> {
     /// Set JSON body
     pub fn json<T: Serialize>(mut self, json: &T) -> Self {
         self.request = self.request.json(json);

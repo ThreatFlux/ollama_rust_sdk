@@ -41,7 +41,7 @@ impl ClientConfig {
     /// Create a new client configuration with the specified base URL
     pub fn new<U: AsRef<str>>(base_url: U) -> Result<Self> {
         let base_url = Url::parse(base_url.as_ref())
-            .map_err(|e| OllamaError::ConfigError(format!("Invalid base URL: {}", e)))?;
+            .map_err(|e| OllamaError::ConfigError(format!("Invalid base URL: {e}")))?;
 
         Ok(Self { base_url, ..Default::default() })
     }
@@ -53,11 +53,11 @@ impl ClientConfig {
 
     /// Get the full URL for an API endpoint
     pub fn endpoint_url(&self, path: &str) -> Result<Url> {
-        let path = if path.starts_with('/') { path } else { &format!("/{}", path) };
+        let path = if path.starts_with('/') { path } else { &format!("/{path}") };
 
-        self.base_url.join(path).map_err(|e| {
-            OllamaError::ConfigError(format!("Invalid endpoint path '{}': {}", path, e))
-        })
+        self.base_url
+            .join(path)
+            .map_err(|e| OllamaError::ConfigError(format!("Invalid endpoint path '{path}': {e}")))
     }
 }
 
@@ -125,7 +125,7 @@ impl ClientConfigBuilder {
     pub fn build(self) -> Result<ClientConfig> {
         let base_url = match self.base_url {
             Some(url) => Url::parse(&url)
-                .map_err(|e| OllamaError::ConfigError(format!("Invalid base URL: {}", e)))?,
+                .map_err(|e| OllamaError::ConfigError(format!("Invalid base URL: {e}")))?,
             None => ClientConfig::default().base_url,
         };
 

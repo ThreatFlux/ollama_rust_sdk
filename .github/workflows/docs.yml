@@ -80,7 +80,7 @@ jobs:
           EOF
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@4ee47c74cee0d21fbb879ea2d5ebe9b3d4f580df # v3.0.2
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
         with:
           path: target/doc
 
@@ -96,7 +96,7 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@0e40adce88c2b98e1f20a2e16853708e8c8f1d70 # v4.0.7
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
 
   check-links:
     name: Check Documentation Links
@@ -106,7 +106,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Link Checker
-        uses: lycheeverse/lychee-action@7cd0af4c74a61395d455af97419e77eadcc22cfd # v2.4.1
+        uses: lycheeverse/lychee-action@82202e5e9c2f4ef1a55a3d02563e1cb6041e5332 # v2.4.1
         with:
           args: >-
             --verbose

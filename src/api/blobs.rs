@@ -162,7 +162,7 @@ mod tests {
 
         let result = BlobsApi::create_blob(&http_client, digest, blob_data).await;
         if let Err(e) = &result {
-            println!("Test error: {:?}", e);
+            println!("Test error: {e:?}");
         }
         assert!(result.is_ok());
     }
@@ -187,7 +187,7 @@ mod tests {
 
         let result = BlobsApi::create_blob(&http_client, digest, blob_data).await;
         if let Err(e) = &result {
-            println!("Empty data test error: {:?}", e);
+            println!("Empty data test error: {e:?}");
         }
         assert!(result.is_ok());
     }

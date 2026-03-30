@@ -20,12 +20,11 @@ async fn test_client_health_check() {
 /// Test listing models (requires Ollama to be running)
 #[tokio::test]
 async fn test_list_models() {
-    let client = match OllamaClient::new("http://localhost:11434") {
-        Ok(client) => client,
-        Err(_) => {
-            println!("Failed to create client, skipping test");
-            return;
-        }
+    let client = if let Ok(client) = OllamaClient::new("http://localhost:11434") {
+        client
+    } else {
+        println!("Failed to create client, skipping test");
+        return;
     };
 
     match client.list_models().await {
@@ -39,7 +38,7 @@ async fn test_list_models() {
             println!("Ollama server not running, skipping test");
         }
         Err(e) => {
-            panic!("Unexpected error: {}", e);
+            panic!("Unexpected error: {e}");
         }
     }
 }
@@ -47,12 +46,11 @@ async fn test_list_models() {
 /// Test basic text generation with first available model
 #[tokio::test]
 async fn test_generation_with_available_model() {
-    let client = match OllamaClient::new("http://localhost:11434") {
-        Ok(client) => client,
-        Err(_) => {
-            println!("Failed to create client, skipping test");
-            return;
-        }
+    let client = if let Ok(client) = OllamaClient::new("http://localhost:11434") {
+        client
+    } else {
+        println!("Failed to create client, skipping test");
+        return;
     };
 
     // Check if server is healthy
@@ -62,12 +60,11 @@ async fn test_generation_with_available_model() {
     }
 
     // Get available models
-    let models = match client.list_models().await {
-        Ok(models) => models,
-        Err(_) => {
-            println!("Could not list models, skipping test");
-            return;
-        }
+    let models = if let Ok(models) = client.list_models().await {
+        models
+    } else {
+        println!("Could not list models, skipping test");
+        return;
     };
 
     if models.models.is_empty() {
@@ -76,7 +73,7 @@ async fn test_generation_with_available_model() {
     }
 
     let model_name = &models.models[0].name;
-    println!("Testing generation with model: {}", model_name);
+    println!("Testing generation with model: {model_name}");
 
     let start = Instant::now();
     let response = client
@@ -92,13 +89,13 @@ async fn test_generation_with_available_model() {
     match response {
         Ok(resp) => {
             println!("Generated response: {}", resp.response);
-            println!("Generation took: {:?}", duration);
+            println!("Generation took: {duration:?}");
             assert!(!resp.response.is_empty());
             assert_eq!(resp.model, *model_name);
             assert!(resp.done);
         }
         Err(e) => {
-            println!("Generation failed: {}", e);
+            println!("Generation failed: {e}");
             // Don't panic, just log the error
         }
     }
@@ -107,12 +104,11 @@ async fn test_generation_with_available_model() {
 /// Test performance metrics
 #[tokio::test]
 async fn test_performance_metrics() {
-    let client = match OllamaClient::new("http://localhost:11434") {
-        Ok(client) => client,
-        Err(_) => {
-            println!("Failed to create client, skipping test");
-            return;
-        }
+    let client = if let Ok(client) = OllamaClient::new("http://localhost:11434") {
+        client
+    } else {
+        println!("Failed to create client, skipping test");
+        return;
     };
 
     if !client.health().await.unwrap_or(false) {
@@ -120,12 +116,11 @@ async fn test_performance_metrics() {
         return;
     }
 
-    let models = match client.list_models().await {
-        Ok(models) => models,
-        Err(_) => {
-            println!("Could not list models, skipping test");
-            return;
-        }
+    let models = if let Ok(models) = client.list_models().await {
+        models
+    } else {
+        println!("Could not list models, skipping test");
+        return;
     };
 
     if models.models.is_empty() {
@@ -134,7 +129,7 @@ async fn test_performance_metrics() {
     }
 
     let model_name = &models.models[0].name;
-    println!("Testing performance with model: {}", model_name);
+    println!("Testing performance with model: {model_name}");
 
     let start = Instant::now();
     let response = client
@@ -149,26 +144,26 @@ async fn test_performance_metrics() {
 
     match response {
         Ok(resp) => {
-            println!("Performance test completed in: {:?}", total_time);
+            println!("Performance test completed in: {total_time:?}");
 
             if let Some(eval_rate) = resp.eval_rate() {
-                println!("Evaluation rate: {:.2} tokens/second", eval_rate);
+                println!("Evaluation rate: {eval_rate:.2} tokens/second");
                 assert!(eval_rate > 0.0, "Evaluation rate should be positive");
             }
 
             if let Some(total_duration) = resp.total_duration {
                 let total_seconds = total_duration as f64 / 1e9;
-                println!("Total generation time: {:.2}s", total_seconds);
+                println!("Total generation time: {total_seconds:.2}s");
                 assert!(total_seconds > 0.0, "Total duration should be positive");
             }
 
             if let Some(eval_count) = resp.eval_count {
-                println!("Tokens evaluated: {}", eval_count);
+                println!("Tokens evaluated: {eval_count}");
                 assert!(eval_count > 0, "Should have evaluated some tokens");
             }
         }
         Err(e) => {
-            println!("Performance test failed: {}", e);
+            println!("Performance test failed: {e}");
         }
     }
 }
@@ -176,12 +171,11 @@ async fn test_performance_metrics() {
 /// Test embeddings with embedding model if available
 #[tokio::test]
 async fn test_embeddings() {
-    let client = match OllamaClient::new("http://localhost:11434") {
-        Ok(client) => client,
-        Err(_) => {
-            println!("Failed to create client, skipping test");
-            return;
-        }
+    let client = if let Ok(client) = OllamaClient::new("http://localhost:11434") {
+        client
+    } else {
+        println!("Failed to create client, skipping test");
+        return;
     };
 
     if !client.health().await.unwrap_or(false) {
@@ -189,12 +183,11 @@ async fn test_embeddings() {
         return;
     }
 
-    let models = match client.list_models().await {
-        Ok(models) => models,
-        Err(_) => {
-            println!("Could not list models, skipping test");
-            return;
-        }
+    let models = if let Ok(models) = client.list_models().await {
+        models
+    } else {
+        println!("Could not list models, skipping test");
+        return;
     };
 
     // Look for embedding models
@@ -204,15 +197,14 @@ async fn test_embeddings() {
         .find(|m| m.name.contains("embed") || m.name.contains("nomic"))
         .map(|m| m.name.as_str());
 
-    let model_name = match embedding_model {
-        Some(name) => name,
-        None => {
-            println!("No embedding model available, skipping test");
-            return;
-        }
+    let model_name = if let Some(name) = embedding_model {
+        name
+    } else {
+        println!("No embedding model available, skipping test");
+        return;
     };
 
-    println!("Testing embeddings with model: {}", model_name);
+    println!("Testing embeddings with model: {model_name}");
 
     let response = client
         .embed()
@@ -229,7 +221,7 @@ async fn test_embeddings() {
             assert!(resp.dimensions().unwrap_or(0) > 0);
         }
         Err(e) => {
-            println!("Embeddings failed: {}", e);
+            println!("Embeddings failed: {e}");
             // Don't panic, just log the error
         }
     }

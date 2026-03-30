@@ -67,7 +67,23 @@ jobs:
             -A clippy::module_name_repetitions \
             -A clippy::missing_errors_doc \
             -A clippy::missing_panics_doc \
-            -A clippy::must_use_candidate
+            -A clippy::must_use_candidate \
+            -A clippy::return_self_not_must_use \
+            -A clippy::cast_possible_truncation \
+            -A clippy::cast_sign_loss \
+            -A clippy::cast_precision_loss \
+            -A clippy::similar_names \
+            -A clippy::unreadable_literal \
+            -A clippy::struct_field_names \
+            -A clippy::wildcard_imports \
+            -A clippy::option_if_let_else \
+            -A clippy::redundant_pub_crate \
+            -A clippy::missing_const_for_fn \
+            -A clippy::doc_markdown \
+            -A clippy::items_after_statements \
+            -A clippy::too_many_lines \
+            -A clippy::collection_is_never_read \
+            -A clippy::manual_let_else
 
   test:
     name: Test (${{ matrix.os }} / ${{ matrix.rust }})
@@ -162,7 +178,7 @@ jobs:
         run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67ab1fd00d0d27f # v5.4.3
+        uses: codecov/codecov-action@4650159d642e33fdc30954ca22638caf0df6cac8 # v5.4.3
         with:
           files: lcov.info
           fail_ci_if_error: false

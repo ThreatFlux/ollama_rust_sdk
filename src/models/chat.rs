@@ -20,10 +20,10 @@ pub enum MessageRole {
 impl std::fmt::Display for MessageRole {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            MessageRole::System => write!(f, "system"),
-            MessageRole::User => write!(f, "user"),
-            MessageRole::Assistant => write!(f, "assistant"),
-            MessageRole::Tool => write!(f, "tool"),
+            Self::System => write!(f, "system"),
+            Self::User => write!(f, "user"),
+            Self::Assistant => write!(f, "assistant"),
+            Self::Tool => write!(f, "tool"),
         }
     }
 }
@@ -277,7 +277,7 @@ impl ChatResponse {
     pub fn eval_rate(&self) -> Option<f64> {
         match (self.eval_count, self.eval_duration) {
             (Some(count), Some(duration)) if duration > 0 => {
-                Some(count as f64 / (duration as f64 / 1e9))
+                Some(f64::from(count) / (duration as f64 / 1e9))
             }
             _ => None,
         }

@@ -16,11 +16,11 @@ pub enum HttpMethod {
 impl HttpMethod {
     pub fn as_str(&self) -> &'static str {
         match self {
-            HttpMethod::Get => "GET",
-            HttpMethod::Post => "POST",
-            HttpMethod::Put => "PUT",
-            HttpMethod::Delete => "DELETE",
-            HttpMethod::Head => "HEAD",
+            Self::Get => "GET",
+            Self::Post => "POST",
+            Self::Put => "PUT",
+            Self::Delete => "DELETE",
+            Self::Head => "HEAD",
         }
     }
 }

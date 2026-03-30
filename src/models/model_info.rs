@@ -259,7 +259,7 @@ impl RunningModel {
 
     /// Get VRAM usage as a string
     pub fn vram_string(&self) -> String {
-        self.size_vram.map(format_bytes).unwrap_or_else(|| "Unknown".to_string())
+        self.size_vram.map_or_else(|| "Unknown".to_string(), format_bytes)
     }
 
     /// Check if the model is about to expire soon (within 1 minute)

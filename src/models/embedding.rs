@@ -33,7 +33,7 @@ impl From<Vec<String>> for EmbedInput {
 
 impl From<Vec<&str>> for EmbedInput {
     fn from(v: Vec<&str>) -> Self {
-        Self::Multiple(v.into_iter().map(|s| s.to_string()).collect())
+        Self::Multiple(v.into_iter().map(std::string::ToString::to_string).collect())
     }
 }
 
@@ -136,7 +136,7 @@ impl EmbedResponse {
 
     /// Get the dimensionality of the embeddings (assumes all have same dimensions)
     pub fn dimensions(&self) -> Option<usize> {
-        self.embeddings.first().map(|emb| emb.len())
+        self.embeddings.first().map(std::vec::Vec::len)
     }
 
     /// Get a specific embedding by index
@@ -223,7 +223,7 @@ mod tests {
         let input: EmbedInput = "test".into();
         match input {
             EmbedInput::Single(s) => assert_eq!(s, "test"),
-            _ => panic!("Expected Single variant"),
+            EmbedInput::Multiple(_) => panic!("Expected Single variant"),
         }
     }
 
@@ -232,7 +232,7 @@ mod tests {
         let input: EmbedInput = vec!["test1", "test2"].into();
         match input {
             EmbedInput::Multiple(v) => assert_eq!(v, vec!["test1", "test2"]),
-            _ => panic!("Expected Multiple variant"),
+            EmbedInput::Single(_) => panic!("Expected Multiple variant"),
         }
     }
 

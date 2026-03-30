@@ -33,16 +33,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
         Err(e) => {
-            eprintln!("Failed to list models: {}", e);
+            eprintln!("Failed to list models: {e}");
             return Ok(());
         }
     }
 
     // Use the first available model, or default to qwen3:30b-a3b
     let models = client.list_models().await?;
-    let model_name = models.models.first().map(|m| m.name.as_str()).unwrap_or("qwen3:30b-a3b");
+    let model_name = models.models.first().map_or("qwen3:30b-a3b", |m| m.name.as_str());
 
-    println!("\nUsing model: {}", model_name);
+    println!("\nUsing model: {model_name}");
 
     // Generate text
     println!("\n=== Basic Generation ===");
@@ -60,14 +60,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             // Show performance metrics if available
             if let Some(rate) = response.eval_rate() {
-                println!("Generation speed: {:.2} tokens/second", rate);
+                println!("Generation speed: {rate:.2} tokens/second");
             }
             if let Some(total_duration) = response.total_duration {
                 println!("Total time: {:.2}s", total_duration as f64 / 1e9);
             }
         }
         Err(OllamaError::ModelNotFound(model)) => {
-            eprintln!("Model '{}' not found. Available models:", model);
+            eprintln!("Model '{model}' not found. Available models:");
             let models = client.list_models().await?;
             for model in models.models {
                 eprintln!("  - {}", model.name);
@@ -76,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             eprintln!("  ollama pull qwen3:30b-a3b");
         }
         Err(e) => {
-            eprintln!("Generation failed: {}", e);
+            eprintln!("Generation failed: {e}");
         }
     }
 
@@ -96,7 +96,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("Response: {}", response.response);
         }
         Err(e) => {
-            eprintln!("Generation with system prompt failed: {}", e);
+            eprintln!("Generation with system prompt failed: {e}");
         }
     }
 

@@ -135,7 +135,7 @@ async fn handle_generate(
                     print!("{}", response.response);
                     io::stdout().flush()?;
                 }
-                Err(e) => eprintln!("Stream error: {}", e),
+                Err(e) => eprintln!("Stream error: {e}"),
             }
         }
         println!();
@@ -152,7 +152,7 @@ async fn handle_chat(
     model: String,
     system: Option<String>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    println!("Starting chat session with {}. Type 'quit' to exit.", model);
+    println!("Starting chat session with {model}. Type 'quit' to exit.");
 
     let mut chat_builder = client.chat().model(&model);
 
@@ -184,7 +184,7 @@ async fn handle_chat(
                 chat_builder = chat_builder.add_assistant_message(&response.message.content);
             }
             Err(e) => {
-                eprintln!("Error: {}", e);
+                eprintln!("Error: {e}");
             }
         }
     }
@@ -202,7 +202,7 @@ async fn handle_embed(
     println!("Generated {} embeddings:", response.embeddings.len());
     for (i, text) in texts.iter().enumerate() {
         if let Some(embedding) = response.embeddings.get(i) {
-            println!("Text: \"{}\"", text);
+            println!("Text: \"{text}\"");
             println!("Embedding dimensions: {}", embedding.len());
             println!("First 5 values: {:?}", &embedding[..5.min(embedding.len())]);
             println!();
@@ -229,10 +229,10 @@ async fn handle_model_commands(
         }
         ModelCommands::Show { name } => match client.show_model(&name).await {
             Ok(info) => {
-                println!("Model: {}", name);
+                println!("Model: {name}");
                 println!("Template: {}", info.template.unwrap_or_default());
                 if let Some(params) = info.parameters {
-                    println!("Parameters: {}", params);
+                    println!("Parameters: {params}");
                 }
                 if let Some(details) = info.details {
                     println!("Family: {}", details.family);
@@ -242,19 +242,19 @@ async fn handle_model_commands(
                 }
             }
             Err(OllamaError::ModelNotFound(_)) => {
-                eprintln!("Model '{}' not found", name);
+                eprintln!("Model '{name}' not found");
             }
             Err(e) => return Err(e.into()),
         },
         ModelCommands::Pull { name } => {
-            println!("Pulling model '{}'...", name);
+            println!("Pulling model '{name}'...");
             client.pull_model(&name).await?;
-            println!("Successfully pulled model '{}'", name);
+            println!("Successfully pulled model '{name}'");
         }
         ModelCommands::Delete { name } => {
-            println!("Deleting model '{}'...", name);
+            println!("Deleting model '{name}'...");
             client.delete_model(&name).await?;
-            println!("Successfully deleted model '{}'", name);
+            println!("Successfully deleted model '{name}'");
         }
         ModelCommands::Running => {
             let running = client.list_running_models().await?;

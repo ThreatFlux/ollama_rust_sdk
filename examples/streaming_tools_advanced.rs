@@ -19,7 +19,7 @@ fn get_weather(location: &str) -> String {
         "paris" => "Paris: 22°C, Clear skies".to_string(),
         "tokyo" => "Tokyo: 28°C, Humid with clouds".to_string(),
         "new york" => "New York: 18°C, Partly cloudy".to_string(),
-        _ => format!("{}: Weather data unavailable", location),
+        _ => format!("{location}: Weather data unavailable"),
     }
 }
 
@@ -37,7 +37,7 @@ fn calculate(expr: &str) -> String {
         let b: f64 = b[1..].trim().parse().unwrap_or(0.0);
         return format!("{} = {}", expr, a + b);
     }
-    format!("Cannot calculate: {}", expr)
+    format!("Cannot calculate: {expr}")
 }
 
 async fn stream_and_collect(
@@ -154,19 +154,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "get_weather" => {
                     let location =
                         args.get("location").and_then(|value| value.as_str()).unwrap_or("Unknown");
-                    println!("  📍 Getting weather for: {}", location);
+                    println!("  📍 Getting weather for: {location}");
                     get_weather(location)
                 }
                 "calculate" => {
                     let expr =
                         args.get("expression").and_then(|value| value.as_str()).unwrap_or("0");
-                    println!("  🧮 Calculating: {}", expr);
+                    println!("  🧮 Calculating: {expr}");
                     calculate(expr)
                 }
                 _ => "Unknown function".to_string(),
             };
 
-            println!("     → {}", result);
+            println!("     → {result}");
 
             // Add tool result to conversation
             let tool_id = call.id.clone().unwrap_or_else(|| "tool_call".to_string());
@@ -219,7 +219,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .and_then(|value| value.as_str())
                     .unwrap_or("0");
                 let result = calculate(expr);
-                println!("  {} ", result);
+                println!("  {result} ");
             }
         }
     }

@@ -52,8 +52,7 @@ impl OllamaClient {
         if let Ok(timeout_raw) = env::var("OLLAMA_TIMEOUT_SECS") {
             let timeout_secs = timeout_raw.parse::<u64>().map_err(|err| {
                 OllamaError::ConfigError(format!(
-                    "Invalid OLLAMA_TIMEOUT_SECS value '{}': {}",
-                    timeout_raw, err
+                    "Invalid OLLAMA_TIMEOUT_SECS value '{timeout_raw}': {err}"
                 ))
             })?;
             builder = builder.timeout(Duration::from_secs(timeout_secs));
@@ -241,7 +240,7 @@ fn parse_env_headers(raw: &str) -> Result<Vec<(String, String)>> {
     }
 
     let value: Value = serde_json::from_str(raw).map_err(|err| {
-        OllamaError::ConfigError(format!("OLLAMA_API_HEADERS must be a JSON object: {}", err))
+        OllamaError::ConfigError(format!("OLLAMA_API_HEADERS must be a JSON object: {err}"))
     })?;
 
     let obj = value.as_object().ok_or_else(|| {
@@ -455,7 +454,7 @@ mod tests {
     #[test]
     fn test_embed_builder_with_different_input_types() {
         let config = ClientConfig::default();
-        let http_client = Arc::new(HttpClient::new(config.clone()).unwrap());
+        let http_client = Arc::new(HttpClient::new(config).unwrap());
 
         // Test with string input
         let builder1 =

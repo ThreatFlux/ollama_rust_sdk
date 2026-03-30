@@ -45,7 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("  Arguments: {}", call.function.arguments);
 
             if let Some(expr) = call.function.arguments.get("expression") {
-                println!("  Parsed expression: {}", expr);
+                println!("  Parsed expression: {expr}");
             }
         }
     } else {

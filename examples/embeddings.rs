@@ -26,10 +26,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .copied()
         .unwrap_or_else(|| {
             // Use first available model as fallback
-            models.models.first().map(|m| m.name.as_str()).unwrap_or("qwen3:30b-a3b")
+            models.models.first().map_or("qwen3:30b-a3b", |m| m.name.as_str())
         });
 
-    println!("Using embedding model: {}", embedding_model);
+    println!("Using embedding model: {embedding_model}");
 
     // Single text embedding
     println!("\n--- Single Text Embedding ---");
@@ -37,7 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     match client.embed().model(embedding_model).input(single_text).send().await {
         Ok(response) => {
-            println!("Input text: \"{}\"", single_text);
+            println!("Input text: \"{single_text}\"");
             println!("Embedding dimensions: {}", response.dimensions().unwrap_or(0));
 
             if let Some(embedding) = response.get_embedding(0) {
@@ -45,11 +45,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                 // Calculate magnitude (L2 norm)
                 let magnitude: f64 = embedding.iter().map(|x| x * x).sum::<f64>().sqrt();
-                println!("Embedding magnitude: {:.4}", magnitude);
+                println!("Embedding magnitude: {magnitude:.4}");
             }
         }
         Err(e) => {
-            eprintln!("Single embedding failed: {}", e);
+            eprintln!("Single embedding failed: {e}");
         }
     }
 
@@ -80,10 +80,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 emb1, emb2,
                             )
                     {
-                        println!(
-                            "Similarity between \"{}\" and \"{}\": {:.4}",
-                            text1, text2, similarity
-                        );
+                        println!("Similarity between \"{text1}\" and \"{text2}\": {similarity:.4}");
                     }
                 }
             }
@@ -108,12 +105,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
 
-            println!("\nMost similar texts (similarity: {:.4}):", max_similarity);
+            println!("\nMost similar texts (similarity: {max_similarity:.4}):");
             println!("  1: \"{}\"", texts[most_similar.0]);
             println!("  2: \"{}\"", texts[most_similar.1]);
         }
         Err(e) => {
-            eprintln!("Batch embeddings failed: {}", e);
+            eprintln!("Batch embeddings failed: {e}");
 
             // If embedding model failed, suggest downloading one
             if e.to_string().contains("not found") {

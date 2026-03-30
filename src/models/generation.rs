@@ -132,7 +132,7 @@ impl GenerateResponse {
     pub fn prompt_eval_rate(&self) -> Option<f64> {
         match (self.prompt_eval_count, self.prompt_eval_duration) {
             (Some(count), Some(duration)) if duration > 0 => {
-                Some(count as f64 / (duration as f64 / 1e9))
+                Some(f64::from(count) / (duration as f64 / 1e9))
             }
             _ => None,
         }
@@ -142,7 +142,7 @@ impl GenerateResponse {
     pub fn eval_rate(&self) -> Option<f64> {
         match (self.eval_count, self.eval_duration) {
             (Some(count), Some(duration)) if duration > 0 => {
-                Some(count as f64 / (duration as f64 / 1e9))
+                Some(f64::from(count) / (duration as f64 / 1e9))
             }
             _ => None,
         }
@@ -152,7 +152,7 @@ impl GenerateResponse {
     pub fn total_rate(&self) -> Option<f64> {
         match (self.prompt_eval_count, self.eval_count, self.total_duration) {
             (Some(prompt_count), Some(eval_count), Some(duration)) if duration > 0 => {
-                Some((prompt_count + eval_count) as f64 / (duration as f64 / 1e9))
+                Some(f64::from(prompt_count + eval_count) / (duration as f64 / 1e9))
             }
             _ => None,
         }

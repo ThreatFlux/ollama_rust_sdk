@@ -129,9 +129,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Get available model
     let models = client.list_models().await?;
-    let model = models.models.first().map(|m| m.name.as_str()).unwrap_or("llama3:latest");
+    let model = models.models.first().map_or("llama3:latest", |m| m.name.as_str());
 
-    println!("Using model: {}\n", model);
+    println!("Using model: {model}\n");
 
     // Example 1: Single parallel search
     println!("{}", "=".repeat(60));
@@ -178,7 +178,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
         Err(e) => {
-            eprintln!("Error: {}", e);
+            eprintln!("Error: {e}");
             // Try without tools if tool calling is not supported
             println!("\nTrying without tools...");
             let response = client.chat().model(model).messages(messages).send().await?;
@@ -198,10 +198,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = Instant::now();
     for query in &queries {
         let _ = fetch_data("database", query).await;
-        println!("  - Fetched: {}", query);
+        println!("  - Fetched: {query}");
     }
     let sequential_time = start.elapsed();
-    println!("  Time: {:?}\n", sequential_time);
+    println!("  Time: {sequential_time:?}\n");
 
     // Parallel execution
     println!("🚀 Parallel Execution:");
@@ -216,7 +216,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  - Fetched: {}", queries[1]);
     println!("  - Fetched: {}", queries[2]);
     let parallel_time = start.elapsed();
-    println!("  Time: {:?}\n", parallel_time);
+    println!("  Time: {parallel_time:?}\n");
 
     println!(
         "⚡ Speedup: {:.2}x faster",

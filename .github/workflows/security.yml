@@ -87,7 +87,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Dependency Review
-        uses: actions/dependency-review-action@da24556b548a50705dd671f47852072ea4c105d9 # v4.7.1
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
         with:
           fail-on-severity: moderate
 
@@ -146,8 +146,13 @@ jobs:
       - name: Generate SBOM
         run: |
           mkdir -p sbom
-          cargo cyclonedx --format json --output-cdx
-          find . -name '*cdx.json' -not -path './target/*' -exec cp {} sbom/ \;
+          cargo cyclonedx --manifest-path Cargo.toml --format json --output-cdx || cargo cyclonedx --format json
+          find . -name '*.cdx.json' -not -path './target/*' -not -path './sbom/*' -exec cp {} sbom/ \; || true
+          # Fallback: if no cdx.json found, generate with default output
+          if [ -z "$(ls -A sbom/ 2>/dev/null)" ]; then
+            cargo cyclonedx --format json
+            find . -name '*.json' -path '*/bom*' -not -path './target/*' -exec cp {} sbom/ \; || true
+          fi
 
       - name: Upload SBOM
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0

@@ -90,7 +90,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
             Err(e) => {
-                eprintln!("❌ Stream error: {}", e);
+                eprintln!("❌ Stream error: {e}");
                 break;
             }
         }
@@ -133,7 +133,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     println!("\n📊 Streaming stats:");
-    println!("  - Chunks received: {}", chunks_received);
+    println!("  - Chunks received: {chunks_received}");
     println!("  - Tool calls: {}", tool_calls.len());
 
     for (i, call) in tool_calls.iter().enumerate() {
@@ -143,10 +143,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let args = &call.function.arguments;
         if call.function.name == "get_weather" {
             let location = args.get("location").and_then(|value| value.as_str()).unwrap_or("?");
-            println!("    Location: {}", location);
+            println!("    Location: {location}");
         } else if call.function.name == "calculate" {
             let expression = args.get("expression").and_then(|value| value.as_str()).unwrap_or("?");
-            println!("    Expression: {}", expression);
+            println!("    Expression: {expression}");
         }
     }
 

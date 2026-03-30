@@ -7,12 +7,11 @@ use tokio_stream::StreamExt;
 /// Test generation performance with different parameters
 #[tokio::test]
 async fn test_generation_performance_metrics() {
-    let client = match OllamaClient::new("http://localhost:11434") {
-        Ok(client) => client,
-        Err(_) => {
-            println!("Failed to create client, skipping performance test");
-            return;
-        }
+    let client = if let Ok(client) = OllamaClient::new("http://localhost:11434") {
+        client
+    } else {
+        println!("Failed to create client, skipping performance test");
+        return;
     };
 
     if !client.health().await.unwrap_or(false) {
@@ -20,12 +19,11 @@ async fn test_generation_performance_metrics() {
         return;
     }
 
-    let models = match client.list_models().await {
-        Ok(models) => models,
-        Err(_) => {
-            println!("Could not list models, skipping performance test");
-            return;
-        }
+    let models = if let Ok(models) = client.list_models().await {
+        models
+    } else {
+        println!("Could not list models, skipping performance test");
+        return;
     };
 
     if models.models.is_empty() {
@@ -35,7 +33,7 @@ async fn test_generation_performance_metrics() {
 
     let model_name = &models.models[0].name;
     println!("\\n=== Performance Test Results ===");
-    println!("Model: {}", model_name);
+    println!("Model: {model_name}");
 
     // Test 1: Short prompt, fast response
     println!("\\n--- Test 1: Short Prompt ---");
@@ -53,18 +51,18 @@ async fn test_generation_performance_metrics() {
     match response {
         Ok(resp) => {
             println!("Response: {}", resp.response);
-            println!("Wall clock time: {:?}", duration);
+            println!("Wall clock time: {duration:?}");
 
             if let Some(total_duration) = resp.total_duration {
                 let server_time = total_duration as f64 / 1e9;
-                println!("Server total time: {:.3}s", server_time);
+                println!("Server total time: {server_time:.3}s");
             }
 
             if let Some(eval_rate) = resp.eval_rate() {
-                println!("Generation rate: {:.2} tokens/second", eval_rate);
+                println!("Generation rate: {eval_rate:.2} tokens/second");
             }
         }
-        Err(e) => println!("Test 1 failed: {}", e),
+        Err(e) => println!("Test 1 failed: {e}"),
     }
 
     // Test 2: Medium prompt
@@ -83,22 +81,22 @@ async fn test_generation_performance_metrics() {
     match response {
         Ok(resp) => {
             println!("Response length: {} characters", resp.response.len());
-            println!("Wall clock time: {:?}", duration);
+            println!("Wall clock time: {duration:?}");
 
             if let Some(total_duration) = resp.total_duration {
                 let server_time = total_duration as f64 / 1e9;
-                println!("Server total time: {:.3}s", server_time);
+                println!("Server total time: {server_time:.3}s");
             }
 
             if let Some(eval_rate) = resp.eval_rate() {
-                println!("Generation rate: {:.2} tokens/second", eval_rate);
+                println!("Generation rate: {eval_rate:.2} tokens/second");
             }
 
             if let Some(eval_count) = resp.eval_count {
-                println!("Tokens generated: {}", eval_count);
+                println!("Tokens generated: {eval_count}");
             }
         }
-        Err(e) => println!("Test 2 failed: {}", e),
+        Err(e) => println!("Test 2 failed: {e}"),
     }
 
     // Test 3: Streaming performance
@@ -115,7 +113,7 @@ async fn test_generation_performance_metrics() {
     {
         Ok(stream) => stream,
         Err(e) => {
-            println!("Failed to create stream: {}", e);
+            println!("Failed to create stream: {e}");
             return;
         }
     };
@@ -137,24 +135,24 @@ async fn test_generation_performance_metrics() {
                 if response.done {
                     let total_time = start.elapsed();
                     println!("Streaming completed:");
-                    println!("  Total chunks: {}", chunks);
-                    println!("  Total characters: {}", total_chars);
-                    println!("  Total time: {:?}", total_time);
+                    println!("  Total chunks: {chunks}");
+                    println!("  Total characters: {total_chars}");
+                    println!("  Total time: {total_time:?}");
 
                     if let Some(first_token) = first_token_time {
                         let time_to_first_token = first_token.duration_since(start);
-                        println!("  Time to first token: {:?}", time_to_first_token);
+                        println!("  Time to first token: {time_to_first_token:?}");
                     }
 
                     if let Some(eval_rate) = response.eval_rate() {
-                        println!("  Final generation rate: {:.2} tokens/second", eval_rate);
+                        println!("  Final generation rate: {eval_rate:.2} tokens/second");
                     }
 
                     break;
                 }
             }
             Err(e) => {
-                println!("Stream error: {}", e);
+                println!("Stream error: {e}");
                 break;
             }
         }
@@ -167,12 +165,11 @@ async fn test_generation_performance_metrics() {
 /// Test chat performance
 #[tokio::test]
 async fn test_chat_performance() {
-    let client = match OllamaClient::new("http://localhost:11434") {
-        Ok(client) => client,
-        Err(_) => {
-            println!("Failed to create client, skipping chat performance test");
-            return;
-        }
+    let client = if let Ok(client) = OllamaClient::new("http://localhost:11434") {
+        client
+    } else {
+        println!("Failed to create client, skipping chat performance test");
+        return;
     };
 
     if !client.health().await.unwrap_or(false) {
@@ -180,12 +177,11 @@ async fn test_chat_performance() {
         return;
     }
 
-    let models = match client.list_models().await {
-        Ok(models) => models,
-        Err(_) => {
-            println!("Could not list models, skipping chat performance test");
-            return;
-        }
+    let models = if let Ok(models) = client.list_models().await {
+        models
+    } else {
+        println!("Could not list models, skipping chat performance test");
+        return;
     };
 
     if models.models.is_empty() {
@@ -195,7 +191,7 @@ async fn test_chat_performance() {
 
     let model_name = &models.models[0].name;
     println!("\\n=== Chat Performance Test ===");
-    println!("Model: {}", model_name);
+    println!("Model: {model_name}");
 
     let start = Instant::now();
     let response = client
@@ -212,30 +208,29 @@ async fn test_chat_performance() {
     match response {
         Ok(resp) => {
             println!("Chat response: {}", resp.message.content);
-            println!("Wall clock time: {:?}", duration);
+            println!("Wall clock time: {duration:?}");
 
             if let Some(total_duration) = resp.total_duration {
                 let server_time = total_duration as f64 / 1e9;
-                println!("Server total time: {:.3}s", server_time);
+                println!("Server total time: {server_time:.3}s");
             }
 
             if let Some(eval_rate) = resp.eval_rate() {
-                println!("Generation rate: {:.2} tokens/second", eval_rate);
+                println!("Generation rate: {eval_rate:.2} tokens/second");
             }
         }
-        Err(e) => println!("Chat performance test failed: {}", e),
+        Err(e) => println!("Chat performance test failed: {e}"),
     }
 }
 
 /// Test embeddings performance
 #[tokio::test]
 async fn test_embeddings_performance() {
-    let client = match OllamaClient::new("http://localhost:11434") {
-        Ok(client) => client,
-        Err(_) => {
-            println!("Failed to create client, skipping embeddings performance test");
-            return;
-        }
+    let client = if let Ok(client) = OllamaClient::new("http://localhost:11434") {
+        client
+    } else {
+        println!("Failed to create client, skipping embeddings performance test");
+        return;
     };
 
     if !client.health().await.unwrap_or(false) {
@@ -243,12 +238,11 @@ async fn test_embeddings_performance() {
         return;
     }
 
-    let models = match client.list_models().await {
-        Ok(models) => models,
-        Err(_) => {
-            println!("Could not list models, skipping embeddings performance test");
-            return;
-        }
+    let models = if let Ok(models) = client.list_models().await {
+        models
+    } else {
+        println!("Could not list models, skipping embeddings performance test");
+        return;
     };
 
     // Look for embedding models
@@ -258,16 +252,15 @@ async fn test_embeddings_performance() {
         .find(|m| m.name.contains("embed") || m.name.contains("nomic"))
         .map(|m| m.name.as_str());
 
-    let model_name = match embedding_model {
-        Some(name) => name,
-        None => {
-            println!("No embedding model available, skipping embeddings performance test");
-            return;
-        }
+    let model_name = if let Some(name) = embedding_model {
+        name
+    } else {
+        println!("No embedding model available, skipping embeddings performance test");
+        return;
     };
 
     println!("\\n=== Embeddings Performance Test ===");
-    println!("Model: {}", model_name);
+    println!("Model: {model_name}");
 
     let texts = vec![
         "This is a test sentence for embeddings.",
@@ -285,14 +278,14 @@ async fn test_embeddings_performance() {
         Ok(resp) => {
             println!("Generated {} embeddings", resp.count());
             println!("Embedding dimensions: {:?}", resp.dimensions());
-            println!("Total time: {:?}", duration);
+            println!("Total time: {duration:?}");
             println!("Average time per text: {:?}", duration / texts.len() as u32);
 
             if let Some(total_duration) = resp.total_duration {
                 let server_time = total_duration as f64 / 1e9;
-                println!("Server total time: {:.3}s", server_time);
+                println!("Server total time: {server_time:.3}s");
             }
         }
-        Err(e) => println!("Embeddings performance test failed: {}", e),
+        Err(e) => println!("Embeddings performance test failed: {e}"),
     }
 }

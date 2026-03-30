@@ -153,7 +153,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  Streaming:");
     println!("    - Time to first chunk: {:.3}s", first_chunk_time.unwrap().as_secs_f64());
     println!("    - Total time: {:.3}s", stream_total.as_secs_f64());
-    println!("    - Chunks received: {}", chunk_count);
+    println!("    - Chunks received: {chunk_count}");
     println!("  Non-streaming:");
     println!("    - Total time: {:.3}s", non_stream_total.as_secs_f64());
 

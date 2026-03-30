@@ -22,7 +22,7 @@ fn get_weather(location: &str, unit: &str) -> serde_json::Value {
         ("Paris", ("sunny", 22, "celsius")),
     ]
     .iter()
-    .cloned()
+    .copied()
     .collect();
 
     // Convert unit if needed
@@ -56,7 +56,7 @@ fn get_stock_price(symbol: &str) -> serde_json::Value {
         ("AMZN", (155.34, 1.5, "up")),
     ]
     .iter()
-    .cloned()
+    .copied()
     .collect();
 
     let (price, change, direction) = stock_prices.get(symbol).unwrap_or(&(100.0, 0.0, "unchanged"));
@@ -110,7 +110,7 @@ fn calculate(expression: &str) -> serde_json::Value {
             if parts.len() == 2 {
                 let a: f64 = parts[0].trim().parse().unwrap_or(0.0);
                 let b: f64 = parts[1].trim().parse().unwrap_or(1.0);
-                if b != 0.0 { a / b } else { 0.0 }
+                if b == 0.0 { 0.0 } else { a / b }
             } else {
                 0.0
             }
@@ -228,62 +228,55 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Choose the best available model for tool calling
     // Note: qwen3:30b, gpt-oss:20b, and gpt-oss:120b are known to support tool calling
-    let model = match client.list_models().await {
-        Ok(models) => {
-            // Prioritize models known to support tool calling
-            if models.models.iter().any(|m| m.name == "gpt-oss:120b") {
-                "gpt-oss:120b".to_string()
-            } else if models.models.iter().any(|m| m.name == "gpt-oss:20b") {
-                "gpt-oss:20b".to_string()
-            } else if models.models.iter().any(|m| m.name == "qwen3:30b") {
-                "qwen3:30b".to_string()
-            } else if models
-                .models
-                .iter()
-                .any(|m| m.name.contains("qwen3") && m.name.contains("30b"))
-            {
-                models
-                    .models
-                    .iter()
-                    .find(|m| m.name.contains("qwen3") && m.name.contains("30b"))
-                    .unwrap()
-                    .name
-                    .clone()
-            } else if models
-                .models
-                .iter()
-                .any(|m| m.name.contains("llama3.1") || m.name.contains("llama3:70b"))
-            {
-                // Larger Llama models may support tools
-                models
-                    .models
-                    .iter()
-                    .find(|m| m.name.contains("llama3.1") || m.name.contains("llama3:70b"))
-                    .unwrap()
-                    .name
-                    .clone()
-            } else if !models.models.is_empty() {
-                eprintln!("⚠️  No known tool-supporting models found.");
-                eprintln!("   Recommended models: gpt-oss:20b, gpt-oss:120b, qwen3:30b");
-                eprintln!("   Using first available model, but tool calling may not work.");
-                models.models[0].name.clone()
-            } else {
-                eprintln!("❌ No models available. Please pull a model first.");
-                eprintln!("   Recommended: ollama pull gpt-oss:20b");
-                return Ok(());
-            }
-        }
-        Err(_) => {
-            eprintln!("⚠️  Could not list models. Defaulting to gpt-oss:20b");
+    let model = if let Ok(models) = client.list_models().await {
+        // Prioritize models known to support tool calling
+        if models.models.iter().any(|m| m.name == "gpt-oss:120b") {
+            "gpt-oss:120b".to_string()
+        } else if models.models.iter().any(|m| m.name == "gpt-oss:20b") {
             "gpt-oss:20b".to_string()
+        } else if models.models.iter().any(|m| m.name == "qwen3:30b") {
+            "qwen3:30b".to_string()
+        } else if models.models.iter().any(|m| m.name.contains("qwen3") && m.name.contains("30b")) {
+            models
+                .models
+                .iter()
+                .find(|m| m.name.contains("qwen3") && m.name.contains("30b"))
+                .unwrap()
+                .name
+                .clone()
+        } else if models
+            .models
+            .iter()
+            .any(|m| m.name.contains("llama3.1") || m.name.contains("llama3:70b"))
+        {
+            // Larger Llama models may support tools
+            models
+                .models
+                .iter()
+                .find(|m| m.name.contains("llama3.1") || m.name.contains("llama3:70b"))
+                .unwrap()
+                .name
+                .clone()
+        } else if !models.models.is_empty() {
+            eprintln!("⚠️  No known tool-supporting models found.");
+            eprintln!("   Recommended models: gpt-oss:20b, gpt-oss:120b, qwen3:30b");
+            eprintln!("   Using first available model, but tool calling may not work.");
+            models.models[0].name.clone()
+        } else {
+            eprintln!("❌ No models available. Please pull a model first.");
+            eprintln!("   Recommended: ollama pull gpt-oss:20b");
+            return Ok(());
         }
+    } else {
+        eprintln!("⚠️  Could not list models. Defaulting to gpt-oss:20b");
+        "gpt-oss:20b".to_string()
     };
 
-    println!("Using model: {}\n", model);
+    println!("Using model: {model}\n");
 
     for query in test_queries {
         println!("{}", "=".repeat(60));
-        println!("📝 User Query: {}", query);
+        println!("📝 User Query: {query}");
         println!("{}", "=".repeat(60));
 
         let mut messages = vec![
@@ -318,7 +311,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     // Process each tool call
                     for tool_call in &tool_calls {
                         let result = process_tool_call(tool_call);
-                        println!("     Result: {}", result);
+                        println!("     Result: {result}");
 
                         // Add tool response to messages
                         let tool_id = tool_call
@@ -343,13 +336,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             println!("\n✅ Final Response: {}", final_response.message.content);
                         }
                         Err(e) => {
-                            eprintln!("❌ Error in follow-up: {}", e);
+                            eprintln!("❌ Error in follow-up: {e}");
                         }
                     }
                 }
             }
             Err(e) => {
-                eprintln!("❌ Error: {}", e);
+                eprintln!("❌ Error: {e}");
 
                 // If tool calling is not supported, try without tools
                 println!("\n⚠️  Tool calling might not be supported by this model.");
@@ -447,7 +440,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
             Err(e) => {
-                eprintln!("❌ Error: {}", e);
+                eprintln!("❌ Error: {e}");
             }
         }
         println!();
