@@ -21,7 +21,7 @@ path = "src/main.rs"
 [dependencies]
 # HTTP client and async runtime
 reqwest = { version = "0.13.2", features = ["json", "stream"] }
-tokio = { version = "1.51.0", features = ["macros", "rt-multi-thread", "sync", "time"] }
+tokio = { version = "1.52.1", features = ["macros", "rt-multi-thread", "sync", "time"] }
 tokio-stream = "0.1.18"
 
 # Serialization
@@ -38,7 +38,7 @@ url = "2.5.8"
 futures-util = "0.3.32"
 
 # CLI support
-clap = { version = "4.6.0", features = ["derive"] }
+clap = { version = "4.6.1", features = ["derive"] }
 env_logger = "0.11.10"
 log = "0.4.29"
 
@@ -46,7 +46,7 @@ log = "0.4.29"
 chrono = { version = "0.4.44", features = ["serde"] }
 
 # Optional: TLS support
-rustls = { version = "0.23.36", optional = true }
+rustls = { version = "0.23.39", optional = true }
 
 # Optional: Tracing support
 tracing = { version = "0.1.44", optional = true }
@@ -59,7 +59,7 @@ mockall = "0.14.0"
 rstest = "0.26.1"
 assert-json-diff = "2.0.2"
 pretty_assertions = "1.4.1"
-uuid = { version = "1.23.0", features = ["serde", "v4"] }
+uuid = { version = "1.23.1", features = ["serde", "v4"] }
 
 [features]
 default = ["tls"]
