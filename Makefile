@@ -119,8 +119,14 @@ setup-dev: dev-setup ## (Deprecated) Use `make dev-setup` instead
 
 docker-build: ## Build Docker image for consistent environment
 	@echo "$(CYAN)Building Docker image...$(NC)"
-	@echo 'FROM rust:1.89-bookworm\n\
+	@echo 'FROM docker.io/threatflux/rust-cicd-template:base-rust-latest\n\
 RUN apt-get update && apt-get install -y pkg-config libssl-dev cmake\n\
+RUN rustup component add rustfmt clippy\n\
+RUN cargo install cargo-chef cargo-audit cargo-llvm-cov\n\
+WORKDIR /workspace\n\
+ENV CARGO_TERM_COLOR=always\n\
+ENV RUST_BACKTRACE=1\n\
+CMD ["cargo", "build"]' | docker build -t $(DOCKER_FULL_NAME) -
 RUN rustup component add rustfmt clippy\n\
 RUN cargo install cargo-audit cargo-llvm-cov\n\
 WORKDIR /workspace\n\
