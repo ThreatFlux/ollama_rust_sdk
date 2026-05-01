@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CODEOWNERS file for review assignments
 - `.editorconfig`, `.dockerignore`, `.cargo/config.toml` configuration
 - Dependabot configuration for automated dependency updates
-- `rust-toolchain.toml` pinning to Rust 1.94.0
+- `rust-toolchain.toml` pinning to Rust 1.95.0
 - `clippy.toml` and `rustfmt.toml` for consistent code style
 - Release profile with LTO, single codegen unit, panic=abort, strip
 - Secret scanning (TruffleHog) in security workflow
@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Upgraded to Rust 2024 edition with MSRV 1.94.0
+- Upgraded to Rust 2024 edition with MSRV 1.95.0
 - Updated all dependencies to latest stable versions
 - Pinned all GitHub Actions to commit SHAs for supply-chain security
 - Restructured CI with quick-check gate, cargo-hack feature powerset testing

@@ -2,7 +2,7 @@
 name = "ollama_rust_sdk"
 version = "0.1.3"
 edition = "2024"
-rust-version = "1.94.0"
+rust-version = "1.95.0"
 authors = ["Your Name <your.email@example.com>"]
 description = "A comprehensive Rust SDK for interacting with the Ollama API"
 license = "MIT"

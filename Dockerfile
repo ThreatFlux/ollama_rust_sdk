@@ -1,7 +1,8 @@
-FROM rust:1.95.0-slim AS builder
+FROM docker.io/threatflux/rust-cicd-template:base-rust-latest AS builder
 
 WORKDIR /app
 
+USER root
 RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
 
 COPY Cargo.toml Cargo.lock ./
@@ -13,6 +14,7 @@ RUN touch src/main.rs src/lib.rs && cargo build --release --bin ollama-cli
 
 FROM debian:bookworm-slim
 
+USER root
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/target/release/ollama-cli /usr/local/bin/ollama-cli

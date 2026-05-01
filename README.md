@@ -3,7 +3,7 @@
 [![CI](https://github.com/ThreatFlux/ollama_rust_sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/ThreatFlux/ollama_rust_sdk/actions/workflows/ci.yml)
 [![Security](https://github.com/ThreatFlux/ollama_rust_sdk/actions/workflows/security.yml/badge.svg)](https://github.com/ThreatFlux/ollama_rust_sdk/actions/workflows/security.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Rust](https://img.shields.io/badge/rust-1.94.0%2B-blue.svg)](https://www.rust-lang.org)
+[![Rust](https://img.shields.io/badge/rust-1.95.0%2B-blue.svg)](https://www.rust-lang.org)
 
 A comprehensive Rust SDK for interacting with the Ollama API. Type-safe, async-first bindings for text generation, chat, embeddings, and model management.
 
@@ -189,7 +189,7 @@ make coverage
 
 ## Requirements
 
-- Rust 1.94.0 or higher
+- Rust 1.95.0 or higher
 - Ollama server running locally or remotely
 - At least one model pulled in Ollama
 
