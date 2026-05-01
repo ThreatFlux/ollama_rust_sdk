@@ -9,7 +9,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_STABLE_VERSION: 1.94.0
+  RUST_STABLE_VERSION: 1.95.0
 
 jobs:
   format:
