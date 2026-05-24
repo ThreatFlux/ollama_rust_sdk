@@ -1,4 +1,4 @@
-FROM docker.io/threatflux/rust-cicd-template:base-rust-latest AS builder
+FROM rust:1.95.0-slim AS builder
 
 ARG RUST_TOOLCHAIN=stable
 ENV RUSTUP_HOME=/opt/rustup \
@@ -8,7 +8,6 @@ USER root
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y pkg-config libssl-dev curl && rm -rf /var/lib/apt/lists/*
-RUN curl -fsSL https://sh.rustup.rs | sh -s -- -y --no-modify-path --default-toolchain ${RUST_TOOLCHAIN} --profile minimal
 
 COPY Cargo.toml Cargo.lock ./
 RUN mkdir src && echo "fn main() {}" > src/main.rs && echo "" > src/lib.rs
