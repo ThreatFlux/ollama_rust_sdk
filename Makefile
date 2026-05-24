@@ -127,12 +127,6 @@ WORKDIR /workspace\n\
 ENV CARGO_TERM_COLOR=always\n\
 ENV RUST_BACKTRACE=1\n\
 CMD ["cargo", "build"]' | docker build -t $(DOCKER_FULL_NAME) -
-RUN rustup component add rustfmt clippy\n\
-RUN cargo install cargo-audit cargo-llvm-cov\n\
-WORKDIR /workspace\n\
-ENV CARGO_TERM_COLOR=always\n\
-ENV RUST_BACKTRACE=1\n\
-CMD ["cargo", "build"]' | docker build -t $(DOCKER_FULL_NAME) -
 
 docker-clean: ## Clean Docker images and containers
 	@echo "$(CYAN)Cleaning Docker resources...$(NC)"

@@ -27,10 +27,10 @@ impl Default for ClientConfig {
     fn default() -> Self {
         Self {
             base_url: Url::parse("http://localhost:11434").expect("Default URL should be valid"),
-            timeout: Duration::from_secs(120),
+            timeout: Duration::from_mins(2),
             user_agent: format!("ollama-rust-sdk/{}", env!("CARGO_PKG_VERSION")),
             max_retries: 3,
-            retry_delay: Duration::from_millis(1000),
+            retry_delay: Duration::from_secs(1),
             follow_redirects: true,
             headers: std::collections::HashMap::new(),
         }
@@ -151,7 +151,7 @@ mod tests {
     fn test_default_config() {
         let config = ClientConfig::default();
         assert_eq!(config.base_url.as_str(), "http://localhost:11434/");
-        assert_eq!(config.timeout, Duration::from_secs(120));
+        assert_eq!(config.timeout, Duration::from_mins(2));
         assert!(config.user_agent.contains("ollama-rust-sdk"));
     }
 
@@ -159,14 +159,14 @@ mod tests {
     fn test_config_builder() {
         let config = ClientConfig::builder()
             .base_url("http://example.com:8080")
-            .timeout(Duration::from_secs(60))
+            .timeout(Duration::from_mins(1))
             .max_retries(5)
             .header("X-Custom", "value")
             .build()
             .unwrap();
 
         assert_eq!(config.base_url.as_str(), "http://example.com:8080/");
-        assert_eq!(config.timeout, Duration::from_secs(60));
+        assert_eq!(config.timeout, Duration::from_mins(1));
         assert_eq!(config.max_retries, 5);
         assert_eq!(config.headers.get("X-Custom"), Some(&"value".to_string()));
     }
