@@ -20,7 +20,7 @@ path = "src/main.rs"
 
 [dependencies]
 # HTTP client and async runtime
-reqwest = { version = "0.13.2", features = ["json", "stream"] }
+reqwest = { version = "0.13.4", features = ["json", "stream"] }
 tokio = { version = "1.52.3", features = ["macros", "rt-multi-thread", "sync", "time"] }
 tokio-stream = "0.1.18"
 
@@ -59,7 +59,7 @@ mockall = "0.14.0"
 rstest = "0.26.1"
 assert-json-diff = "2.0.2"
 pretty_assertions = "1.4.1"
-uuid = { version = "1.23.1", features = ["serde", "v4"] }
+uuid = { version = "1.23.2", features = ["serde", "v4"] }
 
 [features]
 default = ["tls"]
