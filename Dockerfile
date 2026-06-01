@@ -1,4 +1,4 @@
-FROM rust:1.95.0-slim AS builder
+FROM rust:1.96.0-slim AS builder
 
 ARG RUST_TOOLCHAIN=stable
 ENV RUSTUP_HOME=/opt/rustup \
