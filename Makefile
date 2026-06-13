@@ -1,6 +1,13 @@
 # Ollama Rust SDK - Makefile
 # Comprehensive build and test automation
 
+CARGO ?= cargo
+RUST_MSRV ?= 1.96.0
+RUST_TOOLCHAIN ?= 1.96.0
+BINARY_NAME ?= ollama-cli
+BINARY_PACKAGE ?=
+SBOM_MANIFEST_PATH ?= Cargo.toml
+
 # Docker configuration
 DOCKER_IMAGE = ollama-rust-sdk
 DOCKER_TAG = latest
@@ -119,14 +126,15 @@ setup-dev: dev-setup ## (Deprecated) Use `make dev-setup` instead
 
 docker-build: ## Build Docker image for consistent environment
 	@echo "$(CYAN)Building Docker image...$(NC)"
-	@echo 'FROM docker.io/threatflux/rust-cicd-template:base-rust-latest\n\
-RUN apt-get update && apt-get install -y pkg-config libssl-dev cmake\n\
-RUN rustup component add rustfmt clippy\n\
-RUN cargo install cargo-chef cargo-audit cargo-llvm-cov\n\
-WORKDIR /workspace\n\
-ENV CARGO_TERM_COLOR=always\n\
-ENV RUST_BACKTRACE=1\n\
-CMD ["cargo", "build"]' | docker build -t $(DOCKER_FULL_NAME) -
+	@docker build \
+		--build-arg BINARY_NAME=$(BINARY_NAME) \
+		--build-arg BINARY_PACKAGE=$(BINARY_PACKAGE) \
+		--build-arg SBOM_MANIFEST_PATH=$(SBOM_MANIFEST_PATH) \
+		--build-arg OCI_IMAGE_TITLE="Ollama Rust SDK" \
+		--build-arg OCI_IMAGE_DESCRIPTION="Rust SDK and CLI for the Ollama API" \
+		--build-arg OCI_IMAGE_VENDOR="ThreatFlux" \
+		--build-arg OCI_IMAGE_SOURCE="https://github.com/ThreatFlux/ollama_rust_sdk" \
+		-t $(DOCKER_FULL_NAME) .
 
 docker-clean: ## Clean Docker images and containers
 	@echo "$(CYAN)Cleaning Docker resources...$(NC)"
@@ -506,6 +514,11 @@ stats: ## Show project statistics
 # Show variables for debugging
 debug-vars: ## Show Makefile variables
 	@echo "$(CYAN)Makefile Variables:$(NC)"
+	@echo "RUST_MSRV: $(RUST_MSRV)"
+	@echo "RUST_TOOLCHAIN: $(RUST_TOOLCHAIN)"
+	@echo "BINARY_NAME: $(BINARY_NAME)"
+	@echo "BINARY_PACKAGE: $(BINARY_PACKAGE)"
+	@echo "SBOM_MANIFEST_PATH: $(SBOM_MANIFEST_PATH)"
 	@echo "DOCKER_IMAGE: $(DOCKER_IMAGE)"
 	@echo "DOCKER_TAG: $(DOCKER_TAG)"
 	@echo "DOCKER_FULL_NAME: $(DOCKER_FULL_NAME)"
