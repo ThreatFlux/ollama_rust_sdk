@@ -21,8 +21,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  DOCKERHUB_REGISTRY: docker.io
-  DOCKERHUB_NAMESPACE: ${{ vars.RUST_TEMPLATE_DOCKERHUB_NAMESPACE || 'threatflux' }}
   DOCKER_BUILDKIT: 1
   BINARY_NAME: ${{ vars.RUST_TEMPLATE_BINARY_NAME || 'ollama-cli' }}
   BINARY_PACKAGE: ${{ vars.RUST_TEMPLATE_BINARY_PACKAGE || '' }}
@@ -47,16 +45,14 @@ jobs:
         id: lowercase
         run: echo "image_name=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
-      - name: Lowercase repo name
-        id: dockerhub_repo
-        run: |
-          REPO_NAME="${GITHUB_REPOSITORY#*/}"
-          echo "name=${REPO_NAME,,}" >> "$GITHUB_OUTPUT"
-
       - name: Detect Rust toolchain version
         id: rust_toolchain
         run: |
-          TOOLCHAIN_VERSION="$(sed -n 's/^channel[[:space:]]*=[[:space:]]*\"\\(.*\\)\"/\\1/p' rust-toolchain.toml | sed -n '1p')"
+          TOOLCHAIN_VERSION="$(sed -n 's/^channel[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' rust-toolchain.toml | sed -n '1p')"
+          if [ -z "$TOOLCHAIN_VERSION" ]; then
+            echo "::error::Unable to detect Rust toolchain version from rust-toolchain.toml"
+            exit 1
+          fi
           echo "version=${TOOLCHAIN_VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Select build platforms
@@ -80,21 +76,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Log in to Docker Hub
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
-        with:
-          registry: ${{ env.DOCKERHUB_REGISTRY }}
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Extract runtime metadata
         id: meta
         uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
         with:
           images: |
             ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.image_name }}
-            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKERHUB_NAMESPACE }}/${{ steps.dockerhub_repo.outputs.name }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -110,7 +97,6 @@ jobs:
         with:
           images: |
             ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.image_name }}
-            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKERHUB_NAMESPACE }}/${{ steps.dockerhub_repo.outputs.name }}
           tags: |
             type=raw,value=base-rust-${{ steps.rust_toolchain.outputs.version }}
             type=raw,value=base-rust-latest,enable={{is_default_branch}}
