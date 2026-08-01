@@ -2,8 +2,8 @@
 # Comprehensive build and test automation
 
 CARGO ?= cargo
-RUST_MSRV ?= 1.96.0
-RUST_TOOLCHAIN ?= 1.96.0
+RUST_MSRV ?= 1.97.1
+RUST_TOOLCHAIN ?= 1.97.1
 BINARY_NAME ?= ollama-cli
 BINARY_PACKAGE ?=
 SBOM_MANIFEST_PATH ?= Cargo.toml

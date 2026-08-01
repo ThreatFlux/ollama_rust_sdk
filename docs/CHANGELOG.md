@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.5] - 2026-08-01
 
 ### Added
 
@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CODEOWNERS file for review assignments
 - `.editorconfig`, `.dockerignore`, `.cargo/config.toml` configuration
 - Dependabot configuration for automated dependency updates
-- `rust-toolchain.toml` pinning to Rust 1.96.0
+- `rust-toolchain.toml` pinning to Rust 1.97.1
 - `clippy.toml` and `rustfmt.toml` for consistent code style
 - Release profile with LTO, single codegen unit, panic=abort, strip
 - Secret scanning (TruffleHog) in security workflow
@@ -26,13 +26,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Upgraded to Rust 2024 edition with MSRV 1.96.0
+- Upgraded to Rust 2024 edition with MSRV 1.97.1
 - Updated all dependencies to latest stable versions
 - Pinned all GitHub Actions to commit SHAs for supply-chain security
 - Restructured CI with quick-check gate, cargo-hack feature powerset testing
 - Added pedantic and nursery clippy lints to CI
 - Improved release workflow with proper version validation and multi-platform builds
 - Auto-release workflow now uses conventional commits for version determination
+
+### Maintenance
+
+- Refreshed Rust dependencies and Cargo.lock to the latest compatible stable releases
+- Updated Docker and CI toolchains to Rust 1.97.1
+- Updated pinned GitHub Actions and security tooling
 
 ## [0.1.1] - 2025-03-24
 
@@ -48,5 +54,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code coverage with cargo-llvm-cov
 - Security auditing with cargo-audit and cargo-deny
 
-[Unreleased]: https://github.com/ThreatFlux/ollama_rust_sdk/compare/v0.1.1...HEAD
+[0.1.5]: https://github.com/ThreatFlux/ollama_rust_sdk/compare/v0.1.4...HEAD
 [0.1.1]: https://github.com/ThreatFlux/ollama_rust_sdk/releases/tag/v0.1.1
