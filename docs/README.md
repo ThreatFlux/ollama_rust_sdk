@@ -24,6 +24,6 @@ matches your task.
 
 ## Supplemental API material
 
-- [Raw Ollama API curl examples](ollama-api-curl-reference.md) are a server-oriented companion
-  reference. They demonstrate HTTP payloads and model-specific scenarios but are not the primary
-  SDK guide or an SDK coverage claim.
+- [Raw Ollama API curl examples](ollama-api-curl-reference.md) are a loopback-safe,
+  server-oriented companion reference. They demonstrate HTTP payloads and model-specific scenarios
+  but are not the primary SDK guide or an SDK coverage claim.

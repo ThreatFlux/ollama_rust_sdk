@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 import tomllib
@@ -16,10 +17,17 @@ QUICKSTART_BEGIN = "<!-- BEGIN QUICKSTART -->"
 QUICKSTART_END = "<!-- END QUICKSTART -->"
 LINK_RE = re.compile(r"!?\[[^\]\n]*\]\(\s*(<[^>\n]+>|[^\s)]+)")
 FEATURE_ROW_RE = re.compile(r"^\|\s*`([^`]+)`\s*\|", re.MULTILINE)
+CURL_JSON_RE = re.compile(r"-d\s+'(?P<body>\{.*?\})'", re.DOTALL)
 BANNED_CLAIMS = (
     "all Ollama API endpoints",
     "OpenAI-compatible endpoints support",
     "comprehensive model management",
+)
+CURL_REFERENCE = "docs/ollama-api-curl-reference.md"
+RELEASE_TAG_INSTALL = (
+    "cargo add ollama_rust_sdk --git "
+    "https://github.com/ThreatFlux/ollama_rust_sdk.git "
+    '--tag "$OLLAMA_RUST_SDK_TAG"'
 )
 REQUIRED_FILES = (
     "README.md",
@@ -99,6 +107,19 @@ def check_quickstart(readme: str, problems: list[str]) -> None:
         problems.append("README.md: quickstart must match examples/quickstart.rs exactly")
 
 
+def check_installation(readme: str, problems: list[str]) -> None:
+    if RELEASE_TAG_INSTALL not in readme:
+        problems.append("README.md: missing release-tag selection install command")
+    if '--rev "$OLLAMA_RUST_SDK_REV"' not in readme:
+        problems.append("README.md: missing immutable commit install alternative")
+    if "--branch main" not in readme:
+        problems.append("README.md: unreleased install must select main explicitly")
+    if re.search(r"--tag\s+v\d", readme):
+        problems.append("README.md: must not hard-code a release tag as current")
+    if "latest stable GitHub release" in readme:
+        problems.append("README.md: must not make an unchecked latest-release claim")
+
+
 def check_features(readme: str, manifest: dict, problems: list[str]) -> None:
     heading = "## Cargo features"
     if readme.count(heading) != 1:
@@ -138,6 +159,51 @@ def check_claims(problems: list[str]) -> None:
                 problems.append(f"{relative}: unsupported absolute claim: {claim!r}")
 
 
+def check_curl_safety_text(content: str, problems: list[str]) -> None:
+    banned = (
+        'OLLAMA_HOST="0.0.0.0',
+        "OLLAMA_PORT=",
+        "OLLAMA_NUM_GPU=",
+        "OLLAMA_GPU_LAYERS=",
+        "-p 11434:11434",
+    )
+    for text in banned:
+        if text in content:
+            problems.append(f"{CURL_REFERENCE}: unsafe or unsupported example: {text!r}")
+
+
+def check_curl_json_match(
+    content: str, match: re.Match[str], problems: list[str]
+) -> None:
+    body = match.group("body")
+    if "$" in body:
+        # Some shell-loop examples interpolate known local variables.
+        return
+    line = content.count("\n", 0, match.start("body")) + 1
+    try:
+        payload = json.loads(body)
+    except json.JSONDecodeError as error:
+        problems.append(f"{CURL_REFERENCE}:{line}: invalid JSON payload: {error.msg}")
+        return
+
+    command_start = content.rfind("curl", 0, match.start())
+    command = content[command_start : match.start()]
+    native_generation = "/api/generate" in command or "/api/chat" in command
+    options = payload.get("options")
+    if native_generation and isinstance(options, dict) and "max_tokens" in options:
+        problems.append(
+            f"{CURL_REFERENCE}:{line}: native Ollama options use num_predict, not max_tokens"
+        )
+
+
+def check_curl_reference(problems: list[str]) -> None:
+    path = ROOT / CURL_REFERENCE
+    content = path.read_text(encoding="utf-8")
+    check_curl_safety_text(content, problems)
+    for match in CURL_JSON_RE.finditer(content):
+        check_curl_json_match(content, match, problems)
+
+
 def validate(manifest: dict) -> list[str]:
     problems = [
         f"{path}: required documentation file is missing"
@@ -151,7 +217,9 @@ def validate(manifest: dict) -> list[str]:
     check_metadata(manifest, readme, problems)
     check_features(readme, manifest, problems)
     check_quickstart(readme, problems)
+    check_installation(readme, problems)
     check_claims(problems)
+    check_curl_reference(problems)
     check_local_links(problems)
     return problems
 

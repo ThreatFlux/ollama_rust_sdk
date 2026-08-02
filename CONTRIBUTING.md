@@ -26,7 +26,9 @@ python3 scripts/check_docs.py
 cargo check --locked --example quickstart
 ```
 
-The README quickstart must match `examples/quickstart.rs`; edit both in the same change.
+The README quickstart must match `examples/quickstart.rs`; edit both in the same change. The contract
+also keeps Git installation guidance release-safe and validates static JSON payloads in the
+supplemental curl reference.
 
 ## Commit Guidelines
 

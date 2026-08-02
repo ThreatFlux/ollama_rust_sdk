@@ -42,17 +42,31 @@ every Ollama endpoint is available.
 - A model available to that server; `ollama ls` shows locally installed models
 - Tokio with its macros and multithreaded runtime enabled
 
-The latest stable GitHub release is the best starting point for applications:
+This crate is not published to crates.io. For a reproducible dependency, choose
+a release tag from the [GitHub Releases page](https://github.com/ThreatFlux/ollama_rust_sdk/releases),
+record it in your project, and substitute it below:
 
 ```bash
-cargo add ollama_rust_sdk --git https://github.com/ThreatFlux/ollama_rust_sdk.git --tag v0.1.4
+export OLLAMA_RUST_SDK_TAG="replace-with-a-release-tag"
+cargo add ollama_rust_sdk --git https://github.com/ThreatFlux/ollama_rust_sdk.git --tag "$OLLAMA_RUST_SDK_TAG"
 cargo add tokio --features macros,rt-multi-thread
 ```
+
+For a dependency pinned to an audited commit rather than a tag, replace the
+first `cargo add` command above with:
+
+```bash
+export OLLAMA_RUST_SDK_REV="replace-with-a-full-commit-sha"
+cargo add ollama_rust_sdk --git https://github.com/ThreatFlux/ollama_rust_sdk.git --rev "$OLLAMA_RUST_SDK_REV"
+```
+
+The placeholders are intentional: release automation cannot silently make
+this README select a different version for your application.
 
 To test unreleased `main` explicitly:
 
 ```bash
-cargo add ollama_rust_sdk --git https://github.com/ThreatFlux/ollama_rust_sdk.git
+cargo add ollama_rust_sdk --git https://github.com/ThreatFlux/ollama_rust_sdk.git --branch main
 cargo add tokio --features macros,rt-multi-thread
 ```
 
