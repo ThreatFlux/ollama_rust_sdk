@@ -31,7 +31,7 @@ NC = \033[0m # No Color
 .PHONY: help all all-coverage all-docker all-docker-coverage clean docker-build docker-clean
 .PHONY: fmt fmt-check fmt-docker lint lint-strict lint-docker audit audit-docker deny deny-docker
 .PHONY: test test-docker test-doc test-doc-docker test-features feature-check build build-docker build-all build-all-docker
-.PHONY: docs doc-check docs-strict docs-docker examples examples-docker bench bench-check bench-docker
+.PHONY: docs docs-contract doc-check docs-strict docs-docker examples examples-docker bench bench-check bench-docker
 .PHONY: coverage coverage-open coverage-lcov coverage-html coverage-summary coverage-json coverage-docker
 .PHONY: dev-setup setup-dev ci-local ci-local-coverage
 
@@ -298,6 +298,10 @@ docs: ## Generate documentation
 	@echo "$(CYAN)Generating documentation...$(NC)"
 	@cargo doc --all-features --no-deps
 
+docs-contract: ## Validate README metadata, quickstart, features, and local links
+	@echo "$(CYAN)Validating documentation contract...$(NC)"
+	@python3 scripts/check_docs.py
+
 doc-check: ## Check for missing documentation
 	@echo "$(CYAN)Checking for missing documentation...$(NC)"
 	@RUSTDOCFLAGS="-D warnings" cargo doc --all-features --no-deps 2>&1 | grep -q "warning" && \
@@ -412,6 +416,7 @@ ci-local: ## Run CI-like checks locally (full CI/CD simulation)
 	@echo "$(BLUE)=== Doc Tests ===$(NC)"
 	@$(MAKE) test-doc
 	@echo "$(BLUE)=== Documentation ===$(NC)"
+	@$(MAKE) docs-contract
 	@$(MAKE) docs-strict
 	@echo "$(BLUE)=== Build All Features ===$(NC)"
 	@$(MAKE) build-all

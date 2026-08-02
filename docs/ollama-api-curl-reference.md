@@ -1,16 +1,25 @@
-# Ollama API Complete Curl Reference - Qwen3 Edition
+# Ollama API curl examples
+
+These raw HTTP examples complement the Rust SDK documentation; they are not a crate coverage
+matrix or a substitute for the [official Ollama API documentation](https://docs.ollama.com/api/introduction).
+Model availability, capabilities, resource requirements, and server behavior vary by environment
+and Ollama version. Verify model-specific guidance before using these examples in production.
+
+> [!WARNING]
+> A default local Ollama API has no HTTP authentication. These examples keep the server and Docker
+> port bound to loopback. Never bind an unauthenticated server to a public or untrusted network;
+> use an authenticated HTTPS proxy when remote access is required.
 
 ## Base Configuration
 - **Default Base URL**: `http://localhost:11434`
 - **Primary Test Model**: `qwen3:30b-a3b` (Qwen3 30B model)
 - **Secondary Test Model**: `gpt-oss:20b` (OpenAI GPT-OSS 20B)
 - **Embedding Model**: `qwen3-embedding:8b` (Qwen3 Embedding 8B)
-- **No Authentication Required** (for local setup)
+- **Authentication**: none for the loopback-only local setup below
 
 ## Environment Variables
 ```bash
-export OLLAMA_HOST="0.0.0.0"        # Bind to all interfaces
-export OLLAMA_PORT="11434"          # Default port
+export OLLAMA_HOST="127.0.0.1:11434" # Keep the API on loopback
 export OLLAMA_MODELS="/usr/share/ollama/.ollama/models"  # Model storage path
 export OLLAMA_KEEP_ALIVE="5m"       # Model memory retention
 export OLLAMA_NUM_PARALLEL="4"      # Parallel request handling
@@ -81,7 +90,7 @@ curl http://localhost:11434/api/generate \
     "stream": false,
     "options": {
       "temperature": 0.8,
-      "max_tokens": 150
+      "num_predict": 150
     }
   }'
 ```
@@ -246,7 +255,7 @@ curl http://localhost:11434/api/chat \
     "options": {
       "temperature": 0.9,
       "top_p": 0.95,
-      "max_tokens": 500,
+      "num_predict": 500,
       "num_ctx": 8192
     },
     "stream": false
@@ -590,9 +599,9 @@ curl http://localhost:11434/api/generate \
     "model": "qwen3:30b-a3b",
     "prompt": "Explain quantum computing",
     "options": {
-      "num_ctx": 8192,        # Qwen3 supports larger context
+      "num_ctx": 8192,
       "num_batch": 512,
-      "num_gpu": 2,           # Use multiple GPUs for 30B model
+      "num_gpu": 2,
       "main_gpu": 0,
       "low_vram": false,
       "f16_kv": true,
@@ -600,7 +609,7 @@ curl http://localhost:11434/api/generate \
       "vocab_only": false,
       "use_mmap": true,
       "use_mlock": false,
-      "num_thread": 16,       # More threads for larger model
+      "num_thread": 16,
       "num_keep": 24,
       "seed": 42,
       "num_predict": 256,
@@ -759,7 +768,7 @@ curl http://localhost:11434/api/generate \
 docker run -d \
   --gpus=all \
   -v ollama:/root/.ollama \
-  -p 11434:11434 \
+  -p 127.0.0.1:11434:11434 \
   --name ollama \
   --shm-size=8gb \
   ollama/ollama
@@ -780,13 +789,13 @@ docker exec -it ollama ollama pull qwen3-embedding:8b
 # Check GPU availability
 nvidia-smi
 
-# Set GPU layers for optimal performance
-export OLLAMA_NUM_GPU=2  # Use 2 GPUs if available
-export OLLAMA_GPU_LAYERS=35  # Offload layers to GPU
+# Select specific NVIDIA GPUs before starting the Ollama server
+nvidia-smi -L
+export CUDA_VISIBLE_DEVICES="GPU-uuid-1,GPU-uuid-2"
 ```
 
 ### 6. Security Considerations
-- Use reverse proxy with authentication for production
+- Keep the API on loopback unless an authenticated HTTPS proxy protects remote access
 - Limit access to model management endpoints
 - Monitor resource usage for large models
 - Consider rate limiting for API endpoints

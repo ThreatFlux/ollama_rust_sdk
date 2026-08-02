@@ -9,12 +9,10 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   CARGO_TERM_COLOR: always
@@ -27,6 +25,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate documentation contract
+        run: python3 scripts/check_docs.py
+
+      - name: Lint maintained Markdown
+        uses: DavidAnson/markdownlint-cli2-action@3b11e4c3e2eac5207914843511bd517908954018 # v24.1.0
+        with:
+          config: .markdownlint.jsonc
+          globs: |
+            README.md
+            CONTRIBUTING.md
+            SECURITY.md
+            docs/README.md
+            docs/ARCHITECTURE.md
+            docs/api-coverage.md
+            docs/configuration.md
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
@@ -45,8 +61,13 @@ jobs:
 
       - name: Build documentation
         run: |
-          cargo doc --all-features --no-deps
+          cargo doc --locked --all-features --no-deps
           echo '<meta http-equiv="refresh" content="0; url=ollama_rust_sdk/index.html">' > target/doc/index.html
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+      - name: Compile quickstart
+        run: cargo check --locked --example quickstart
 
       - name: Add examples to docs
         run: |
@@ -68,6 +89,7 @@ jobs:
           </head>
           <body>
               <h1>Ollama Rust SDK Examples</h1>
+              <div class="example"><a href="quickstart.rs">Quickstart</a> - Minimal generation request</div>
               <div class="example"><a href="basic_generation.rs">Basic Generation</a> - Simple text generation example</div>
               <div class="example"><a href="streaming_chat.rs">Streaming Chat</a> - Real-time streaming chat</div>
               <div class="example"><a href="embeddings.rs">Embeddings</a> - Generate and compare embeddings</div>
@@ -92,6 +114,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build-docs
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
 
     steps:
       - name: Deploy to GitHub Pages
@@ -104,6 +130,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Link Checker
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
