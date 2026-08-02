@@ -1,4 +1,9 @@
-# Ollama API Complete Curl Reference - Qwen3 Edition
+# Ollama API curl examples
+
+These raw HTTP examples complement the Rust SDK documentation; they are not a crate coverage
+matrix or a substitute for the [official Ollama API documentation](https://docs.ollama.com/api/introduction).
+Model availability, capabilities, resource requirements, and server behavior vary by environment
+and Ollama version. Verify model-specific guidance before using these examples in production.
 
 ## Base Configuration
 - **Default Base URL**: `http://localhost:11434`

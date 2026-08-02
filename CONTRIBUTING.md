@@ -18,6 +18,16 @@ make dev-setup
 make ci-local
 ```
 
+Documentation changes have a machine-checkable contract. When editing the README, Cargo features,
+package metadata, quickstart, or local documentation links, use Python 3.11 or newer and run:
+
+```bash
+python3 scripts/check_docs.py
+cargo check --locked --example quickstart
+```
+
+The README quickstart must match `examples/quickstart.rs`; edit both in the same change.
+
 ## Commit Guidelines
 
 We use [Conventional Commits](https://www.conventionalcommits.org/):
@@ -42,6 +52,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 - [ ] All tests pass (`make test`)
 - [ ] Linting passes (`make lint`)
 - [ ] Documentation updated if needed
+- [ ] Documentation contract passes (`make docs-contract`)
 - [ ] Commit messages follow conventions
 
 ## Security Issues

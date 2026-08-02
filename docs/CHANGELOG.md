@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Documentation
+
+- Reworked the README around verified SDK capabilities, a compile-checked quickstart, and explicit
+  reliability and support guidance
+- Added source-derived API coverage and configuration references
+- Moved the supplemental raw curl examples under `docs/` and added a documentation index
+- Added a documentation contract that checks metadata, feature flags, quickstart drift, unsupported
+  claims, and local links in CI
+
+### Changed
+
+- Replaced placeholder Cargo package metadata with the canonical ThreatFlux repository and
+  documentation URLs
+
 ## [0.1.5] - 2026-08-01
 
 ### Added
@@ -54,5 +70,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code coverage with cargo-llvm-cov
 - Security auditing with cargo-audit and cargo-deny
 
+[Unreleased]: https://github.com/ThreatFlux/ollama_rust_sdk/compare/v0.1.4...HEAD
 [0.1.5]: https://github.com/ThreatFlux/ollama_rust_sdk/compare/v0.1.4...HEAD
 [0.1.1]: https://github.com/ThreatFlux/ollama_rust_sdk/releases/tag/v0.1.1

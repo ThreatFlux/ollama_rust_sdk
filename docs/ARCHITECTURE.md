@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Ollama Rust SDK is a type-safe, async-first client library for the Ollama API. It provides builder-pattern request construction, streaming response handling, and comprehensive model management through a layered architecture.
+The Ollama Rust SDK is a type-safe, async-first client library for supported native Ollama API endpoints. It provides builder-pattern request construction, streaming response handling, and selected model-management operations through a layered architecture.
 
 ## Component Map
 

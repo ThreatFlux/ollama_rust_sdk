@@ -3,10 +3,12 @@ name = "ollama_rust_sdk"
 version = "0.1.5"
 edition = "2024"
 rust-version = "1.97.1"
-authors = ["Your Name <your.email@example.com>"]
-description = "A comprehensive Rust SDK for interacting with the Ollama API"
+description = "Async Rust client and CLI for supported Ollama API endpoints"
 license = "MIT"
-repository = "https://github.com/yourusername/ollama_rust_sdk"
+repository = "https://github.com/ThreatFlux/ollama_rust_sdk"
+homepage = "https://github.com/ThreatFlux/ollama_rust_sdk"
+documentation = "https://threatflux.github.io/ollama_rust_sdk/"
+readme = "README.md"
 keywords = ["ollama", "ai", "llm", "sdk", "rust"]
 categories = ["api-bindings", "web-programming::http-client"]
 
