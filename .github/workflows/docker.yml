@@ -214,7 +214,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Trivy results
-        uses: github/codeql-action/upload-sarif@1cd4d01d58f636bbdbffbfd3c121b3446d07e9f3 # pinned commit
+        uses: github/codeql-action/upload-sarif@7d9249f5a57288b8a472ddd9cc3ece1921f7dc38 # pinned commit
         with:
           sarif_file: trivy-results.sarif
         if: always() && hashFiles('trivy-results.sarif') != ''
