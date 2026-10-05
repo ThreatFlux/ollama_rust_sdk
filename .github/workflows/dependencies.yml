@@ -5,6 +5,9 @@ on:
     - cron: '0 3 * * 1'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   CARGO_TERM_COLOR: always
   RUST_VERSION: 1.99.0
@@ -13,9 +16,15 @@ jobs:
   update-dependencies:
     name: Update Dependencies
     runs-on: ubuntu-latest
+    # This job executes build scripts and tests from freshly updated crates, so
+    # it only gets a read-only GITHUB_TOKEN and never sees the PR-creation token.
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # pinned master commit
@@ -35,10 +44,41 @@ jobs:
           cargo test --all-features
           cargo build --all-features
 
+      - name: Upload updated lockfile
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: updated-cargo-lock
+          path: Cargo.lock
+          if-no-files-found: error
+          retention-days: 1
+
+  create-pull-request:
+    name: Create Dependency Update PR
+    needs: update-dependencies
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download updated lockfile
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: updated-cargo-lock
+          path: .
+
+      # PRs opened with GITHUB_TOKEN do not trigger pull_request workflows, so
+      # CI never runs on them. GIT_TOKEN is the ThreatFlux org PAT secret used
+      # for bot-authored PRs; fall back to GITHUB_TOKEN if it is not available.
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GIT_TOKEN || secrets.GITHUB_TOKEN }}
+          add-paths: Cargo.lock
           commit-message: "chore(deps): update dependencies"
           title: "chore(deps): weekly dependency updates"
           body: |
@@ -56,9 +96,13 @@ jobs:
   check-outdated:
     name: Check Outdated Dependencies
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # pinned master commit
