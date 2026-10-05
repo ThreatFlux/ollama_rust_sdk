@@ -56,9 +56,11 @@ jobs:
     name: Create Dependency Update PR
     needs: update-dependencies
     runs-on: ubuntu-latest
+    # create-pull-request pushes and opens the PR with GITHUB_TOKEN; this job
+    # runs no dependency code.
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write # push the deps/weekly-update branch
+      pull-requests: write # open or update the dependency PR
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -71,13 +73,15 @@ jobs:
           name: updated-cargo-lock
           path: .
 
-      # PRs opened with GITHUB_TOKEN do not trigger pull_request workflows, so
-      # CI never runs on them. GIT_TOKEN is the ThreatFlux org PAT secret used
-      # for bot-authored PRs; fall back to GITHUB_TOKEN if it is not available.
+      # With GITHUB_TOKEN the PR is authored by github-actions[bot] and its
+      # pull_request runs wait at action_required until a maintainer approves
+      # them. A GitHub App installation token (actions/create-github-app-token)
+      # would let CI start automatically. The org GIT_TOKEN PAT is not used
+      # because it currently fails authentication (HTTP 401).
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
-          token: ${{ secrets.GIT_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           add-paths: Cargo.lock
           commit-message: "chore(deps): update dependencies"
           title: "chore(deps): weekly dependency updates"
