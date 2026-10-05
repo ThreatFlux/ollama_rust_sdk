@@ -191,7 +191,9 @@ configuration, error behavior, streaming caveats, and production guidance.
 
 ## Development
 
+Development uses the pinned Rust **1.99.0** toolchain; the consumer MSRV remains **1.97.1**.
 The documentation contract requires Python 3.11 or newer.
+Install the pinned tools with `make dev-setup`, and run `make ci-local` before pushing.
 
 ```bash
 cargo fmt --all -- --check

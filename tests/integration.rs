@@ -90,7 +90,7 @@ async fn test_generation_with_available_model() {
         Ok(resp) => {
             println!("Generated response: {}", resp.response);
             println!("Generation took: {duration:?}");
-            assert!(!resp.response.is_empty());
+            assert_ne!(resp.response, "");
             assert_eq!(resp.model, *model_name);
             assert!(resp.done);
         }

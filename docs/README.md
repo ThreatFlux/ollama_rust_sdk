@@ -7,6 +7,8 @@ matches your task.
 
 - [API coverage](api-coverage.md) maps public client methods to native Ollama endpoints and records
   known limitations.
+- [SDK feature audit and implementation plan](sdk-feature-audit.md) records verified current-server
+  incompatibilities, missing native capabilities and a prioritized follow-up plan.
 - [Configuration and reliability](configuration.md) covers endpoints, authentication headers,
   timeouts, retries, errors, streaming, TLS, and production use.
 - [Generated API documentation](https://threatflux.github.io/ollama_rust_sdk/) contains public Rust

@@ -1,7 +1,7 @@
 # ThreatFlux Rust Dockerfile
 # Multi-stage build for single-crate or workspace-based applications.
 
-FROM rust:1.98.0-bookworm AS rust-base
+FROM rust:1.99.0-bookworm AS rust-base
 
 ARG VERSION=0.0.0
 ARG BUILD_DATE=unknown
@@ -15,7 +15,7 @@ ARG OCI_IMAGE_VENDOR=ThreatFlux
 ARG OCI_IMAGE_SOURCE=https://github.com/ThreatFlux/ollama_rust_sdk
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates=20230311+deb12u1 \
+    ca-certificates=20250419~deb12u1 \
     pkg-config=1.8.1-1 \
     libssl-dev=3.0.20-1~deb12u2 \
     && rm -rf /var/lib/apt/lists/*
@@ -29,12 +29,12 @@ WORKDIR /build
 COPY --chown=builder:builder . .
 
 RUN if [ -n "${BINARY_PACKAGE}" ]; then \
-      cargo build --release -p "${BINARY_PACKAGE}" --bin "${BINARY_NAME}" --all-features; \
+      cargo build --locked --release -p "${BINARY_PACKAGE}" --bin "${BINARY_NAME}" --all-features; \
     else \
-      cargo build --release --bin "${BINARY_NAME}" --all-features || cargo build --release --all-features; \
+      cargo build --locked --release --bin "${BINARY_NAME}" --all-features || cargo build --locked --release --all-features; \
     fi
 
-RUN cargo install cargo-cyclonedx --locked --version 0.5.8 && \
+RUN cargo install cargo-cyclonedx --locked --version 0.5.9 && \
     cargo cyclonedx \
       --manifest-path "${SBOM_MANIFEST_PATH}" \
       --all-features \
@@ -62,7 +62,7 @@ LABEL org.opencontainers.image.title="${OCI_IMAGE_TITLE}" \
       org.opencontainers.image.source="${OCI_IMAGE_SOURCE}"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates=20230311+deb12u1 \
+    ca-certificates=20250419~deb12u1 \
     libssl3=3.0.20-1~deb12u2 \
     tini=0.19.0-1+b3 \
     && rm -rf /var/lib/apt/lists/* \

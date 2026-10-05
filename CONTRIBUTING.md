@@ -15,6 +15,7 @@ Thank you for your interest in contributing to the Ollama Rust SDK.
 
 ```bash
 make dev-setup
+make hooks-install
 make ci-local
 ```
 
@@ -29,6 +30,11 @@ cargo check --locked --example quickstart
 The README quickstart must match `examples/quickstart.rs`; edit both in the same change. The contract
 also keeps Git installation guidance release-safe and validates static JSON payloads in the
 supplemental curl reference.
+
+The development toolchain is Rust 1.99.0, while consumers remain supported on Rust 1.97.1.
+`make ci-local` checks the actual MSRV, every feature combination, the CI Clippy policy, and
+security and dependency policy; failures stop the gate. Repository hooks also check formatting
+and the documentation contract, and installation preserves foreign or symlink hooks.
 
 ## Commit Guidelines
 
