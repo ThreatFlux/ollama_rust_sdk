@@ -3,7 +3,7 @@
 
 CARGO ?= cargo
 RUST_MSRV ?= 1.97.1
-RUST_TOOLCHAIN ?= 1.97.1
+RUST_TOOLCHAIN ?= 1.99.0
 BINARY_NAME ?= ollama-cli
 BINARY_PACKAGE ?=
 SBOM_MANIFEST_PATH ?= Cargo.toml
@@ -33,7 +33,7 @@ NC = \033[0m # No Color
 .PHONY: test test-docker test-doc test-doc-docker test-features feature-check build build-docker build-all build-all-docker
 .PHONY: docs docs-contract doc-check docs-strict docs-docker examples examples-docker bench bench-check bench-docker
 .PHONY: coverage coverage-open coverage-lcov coverage-html coverage-summary coverage-json coverage-docker
-.PHONY: dev-setup setup-dev ci-local ci-local-coverage
+.PHONY: dev-setup setup-dev ci-local ci-local-coverage hooks-install lint-ci msrv-check
 
 # Default target - matches CI/CD workflow
 all: fmt-check lint-strict audit deny feature-check test test-doc docs-strict build-all examples ## Run all CI/CD checks and builds locally
@@ -101,21 +101,15 @@ help: ## Show this help message
 # Setup and Installation
 # =============================================================================
 
-dev-setup: ## Install development tools required for `make all`
-	@echo "$(CYAN)Installing development tools...$(NC)"
-	@echo "$(BLUE)Checking for rustfmt...$(NC)"
-	@rustup component add rustfmt 2>/dev/null || echo "rustfmt already installed"
-	@echo "$(BLUE)Checking for clippy...$(NC)"
-	@rustup component add clippy 2>/dev/null || echo "clippy already installed"
-	@echo "$(BLUE)Checking for cargo-audit...$(NC)"
-	@cargo install cargo-audit 2>/dev/null || echo "cargo-audit already installed"
-	@echo "$(BLUE)Checking for cargo-deny...$(NC)"
-	@cargo install cargo-deny 2>/dev/null || echo "cargo-deny already installed"
-	@echo "$(BLUE)Checking for cargo-llvm-cov...$(NC)"
-	@cargo install cargo-llvm-cov 2>/dev/null || echo "cargo-llvm-cov already installed"
-	@echo "$(BLUE)Checking for jq (for feature checks)...$(NC)"
-	@command -v jq >/dev/null 2>&1 || echo "$(YELLOW)jq not installed. Install with: apt-get install jq (or brew install jq)$(NC)"
-	@echo "$(GREEN)Development tools installed!$(NC)"
+hooks-install: ## Install repository-owned hooks safely in any worktree
+	@sh scripts/install_hooks.sh
+
+dev-setup: hooks-install ## Install the pinned development tools used by CI
+	@rustup component add --toolchain $(RUST_TOOLCHAIN) rustfmt clippy llvm-tools-preview
+	@cargo install cargo-audit --locked --version 0.22.2
+	@cargo install cargo-deny --locked --version 0.20.2
+	@cargo install cargo-hack --locked --version 0.6.45
+	@cargo install cargo-llvm-cov --locked --version 0.9.1
 
 setup-dev: dev-setup ## (Deprecated) Use `make dev-setup` instead
 	@echo "$(YELLOW)Warning: 'setup-dev' is deprecated; use 'make dev-setup'.$(NC)"
@@ -168,14 +162,37 @@ lint: ## Run clippy linting
 	@echo "$(BLUE)  With default features...$(NC)"
 	@cargo clippy --all-targets -- -W warnings
 
-lint-strict: ## Run clippy with strict settings (matches CI/CD)
-	@echo "$(CYAN)Running strict clippy linting (CI/CD mode)...$(NC)"
-	@echo "$(BLUE)  With all features and all targets...$(NC)"
-	@cargo clippy --all-features --all-targets -- -D warnings
-	@echo "$(BLUE)  With no default features...$(NC)"
-	@cargo clippy --no-default-features --all-targets -- -D warnings
-	@echo "$(BLUE)  With default features...$(NC)"
-	@cargo clippy --all-targets -- -D warnings
+lint-ci: ## Run the exact strict Clippy policy used by CI Quick Check
+	@cargo clippy --all-features --all-targets -- \
+	  -D warnings \
+	  -D clippy::all \
+	  -D clippy::pedantic \
+	  -D clippy::nursery \
+	  -A clippy::multiple_crate_versions \
+	  -A clippy::module_name_repetitions \
+	  -A clippy::missing_errors_doc \
+	  -A clippy::missing_panics_doc \
+	  -A clippy::must_use_candidate \
+	  -A clippy::return_self_not_must_use \
+	  -A clippy::cast_possible_truncation \
+	  -A clippy::cast_sign_loss \
+	  -A clippy::cast_precision_loss \
+	  -A clippy::similar_names \
+	  -A clippy::unreadable_literal \
+	  -A clippy::struct_field_names \
+	  -A clippy::wildcard_imports \
+	  -A clippy::option_if_let_else \
+	  -A clippy::redundant_pub_crate \
+	  -A clippy::missing_const_for_fn \
+	  -A clippy::doc_markdown \
+	  -A clippy::items_after_statements \
+	  -A clippy::too_many_lines \
+	  -A clippy::collection_is_never_read \
+	  -A clippy::manual_let_else
+
+lint-strict: lint-ci ## Run strict Clippy across all, default and no-default features
+	@cargo clippy --locked --no-default-features --all-targets -- -D warnings
+	@cargo clippy --locked --all-targets -- -D warnings
 
 lint-docker: docker-build ## Run clippy linting in Docker
 	@echo "$(CYAN)Running clippy linting in Docker...$(NC)"
@@ -189,24 +206,19 @@ lint-docker: docker-build ## Run clippy linting in Docker
 # Security and Dependency Commands
 # =============================================================================
 
-audit: ## Run security audit
-	@echo "$(CYAN)Running security audit...$(NC)"
-	@cargo audit || echo "$(YELLOW)Warning: Some vulnerabilities found. Review and update dependencies.$(NC)"
+audit: ## Fail on security advisories or advisory warnings
+	@cargo audit --deny warnings
 
 audit-docker: docker-build ## Run security audit in Docker
 	@echo "$(CYAN)Running security audit in Docker...$(NC)"
 	@docker run --rm -v "$(PWD):/workspace" $(DOCKER_FULL_NAME) cargo audit
 
-deny: ## Run dependency validation (requires cargo-deny)
-	@echo "$(CYAN)Running dependency validation...$(NC)"
-	@command -v cargo-deny >/dev/null 2>&1 || cargo install cargo-deny
-	@cargo deny check licenses || echo "$(YELLOW)Warning: License issues found$(NC)"
-	@cargo deny check advisories || echo "$(YELLOW)Warning: Security advisories found$(NC)"
-	@cargo deny check bans || echo "$(YELLOW)Warning: Banned dependencies found$(NC)"
+deny: ## Check the all-feature dependency graph and policy
+	@cargo deny --all-features check
 
 deny-docker: docker-build ## Run dependency validation in Docker
 	@echo "$(CYAN)Running dependency validation in Docker...$(NC)"
-	@docker run --rm -v "$(PWD):/workspace" $(DOCKER_FULL_NAME) sh -c "cargo install cargo-deny && cargo deny check"
+	@docker run --rm -v "$(PWD):/workspace" $(DOCKER_FULL_NAME) sh -c "cargo install cargo-deny --locked --version 0.20.2 && cargo deny --all-features check"
 
 # =============================================================================
 # Testing Commands
@@ -238,19 +250,15 @@ test-features: ## Test with different feature combinations
 	@cargo test --verbose --no-default-features
 	@echo "$(GREEN)Feature combinations tested!$(NC)"
 
-feature-check: ## Check each feature individually (matches CI/CD)
-	@echo "$(CYAN)Checking feature combinations...$(NC)"
-	@echo "$(BLUE)Checking no default features...$(NC)"
-	@cargo check --no-default-features
-	@echo "$(BLUE)Checking all features...$(NC)"
-	@cargo check --all-features
-	@echo "$(BLUE)Checking each feature individually...$(NC)"
-	@cargo metadata --no-deps --format-version 1 | \
-	jq -r '.packages[0].features | keys[]' 2>/dev/null | \
-	while read feature; do \
-		echo "  Checking feature: $$feature"; \
-		cargo check --no-default-features --features "$$feature" || exit 1; \
-	done || echo "$(YELLOW)Warning: jq not installed, skipping individual feature checks$(NC)"
+msrv-check: ## Verify compatibility with the actual consumer MSRV
+	@cargo +$(RUST_MSRV) check --locked --all-targets --all-features
+
+feature-check: ## Check every combination using the same tool as CI
+	@set -eu; \
+	lock_snapshot=$$(mktemp); \
+	cp Cargo.lock "$$lock_snapshot"; \
+	trap 'cp "$$lock_snapshot" Cargo.lock; rm -f "$$lock_snapshot"' 0; \
+	cargo hack check --workspace --feature-powerset --no-dev-deps
 
 test-lib: ## Run library unit tests only
 	@echo "$(CYAN)Running library unit tests...$(NC)"
@@ -302,17 +310,10 @@ docs-contract: ## Validate README metadata, quickstart, features, and local link
 	@echo "$(CYAN)Validating documentation contract...$(NC)"
 	@python3 scripts/check_docs.py
 
-doc-check: ## Check for missing documentation
-	@echo "$(CYAN)Checking for missing documentation...$(NC)"
-	@RUSTDOCFLAGS="-D warnings" cargo doc --all-features --no-deps 2>&1 | grep -q "warning" && \
-		(echo "$(RED)Missing documentation found!$(NC)" && exit 1) || \
-		echo "$(GREEN)All documentation present!$(NC)"
+doc-check: docs-strict ## Check Rustdoc warnings and local documentation links
 
-docs-strict: ## Generate documentation with strict checks (matches CI/CD)
-	@echo "$(CYAN)Generating documentation with strict checks...$(NC)"
-	@RUSTDOCFLAGS="-D warnings" cargo doc --all-features --no-deps
-	@echo "$(BLUE)Checking for broken links...$(NC)"
-	@! grep -r "unresolved link" target/doc/*.html 2>/dev/null || echo "$(GREEN)No broken links found$(NC)"
+docs-strict: docs-contract ## Generate documentation with strict compiler checks
+	@RUSTDOCFLAGS="-D warnings" cargo doc --locked --all-features --no-deps
 
 docs-docker: docker-build ## Generate documentation in Docker
 	@echo "$(CYAN)Generating documentation in Docker...$(NC)"
@@ -411,6 +412,7 @@ ci-local: ## Run CI-like checks locally (full CI/CD simulation)
 	@$(MAKE) deny
 	@echo "$(BLUE)=== Feature Checks ===$(NC)"
 	@$(MAKE) feature-check
+	@$(MAKE) msrv-check
 	@echo "$(BLUE)=== Tests ===$(NC)"
 	@$(MAKE) test
 	@echo "$(BLUE)=== Doc Tests ===$(NC)"

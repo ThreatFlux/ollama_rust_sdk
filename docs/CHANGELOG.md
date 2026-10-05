@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 
+- Audited current official Ollama APIs and recorded a prioritized feature and correctness plan
+
 - Reworked the README around verified SDK capabilities, a compile-checked quickstart, and explicit
   reliability and support guidance
 - Added source-derived API coverage and configuration references
@@ -17,6 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   claims, and local links in CI
 
 ### Changed
+
+- Pinned development, fixed CI jobs, release builds and Docker to stable Rust 1.99.0 while retaining
+  and testing the consumer MSRV of 1.97.1
+- Upgraded twelve direct/development crates and refreshed the stable, non-yanked dependency graph,
+  including rustls 0.23.45 for RUSTSEC-2026-0285
+- Refreshed immutable GitHub Action pins and pinned development/CI command-line tools
+- Added worktree-aware repository hook installation; aligned local feature, lint and MSRV checks
+  with CI, and made security and dependency gate failures propagate
+- Updated the Docker certificate pin to match Bookworm and prevent the existing downgrade failure
 
 - Replaced placeholder Cargo package metadata with the canonical ThreatFlux repository and
   documentation URLs

@@ -7,7 +7,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_VERSION: 1.97.1
+  RUST_VERSION: 1.99.0
 
 jobs:
   update-dependencies:
@@ -18,9 +18,12 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # pinned master commit
         with:
           toolchain: ${{ env.RUST_VERSION }}
+
+      - name: Install cargo-outdated
+        run: cargo install cargo-outdated --locked --version 0.19.0
 
       - name: Update dependencies
         run: |
@@ -58,16 +61,16 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # pinned master commit
         with:
           toolchain: ${{ env.RUST_VERSION }}
 
       - name: Install cargo-outdated
-        run: cargo install cargo-outdated
+        run: cargo install cargo-outdated --locked --version 0.19.0
 
       - name: Check outdated dependencies
         run: |
-          echo "## Outdated Dependencies Report" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          cargo outdated >> $GITHUB_STEP_SUMMARY || true
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "## Outdated Dependencies Report" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cargo outdated >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

@@ -319,7 +319,7 @@ mod tests {
 
         assert_eq!(config.base_url.as_str(), "http://localhost:11434/");
         assert!(config.timeout.as_secs() > 0);
-        assert!(!config.user_agent.is_empty());
+        assert_ne!(config.user_agent, "");
     }
 
     #[tokio::test]

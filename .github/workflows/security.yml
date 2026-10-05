@@ -17,7 +17,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_VERSION: 1.97.1
+  RUST_VERSION: 1.99.0
 
 jobs:
   audit:
@@ -28,17 +28,17 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # pinned master commit
         with:
           toolchain: ${{ env.RUST_VERSION }}
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@37f7c5781271959fb65b6b35224e28652ff2b63d # v2.87.0
+        uses: taiki-e/install-action@e407f7bafb71fd004bc5c2da3032e5470cbb6ef0 # v2.87.24
         with:
-          tool: cargo-audit
+          tool: cargo-audit@0.22.2
 
       - name: Run security audit
-        run: cargo audit
+        run: cargo audit --deny warnings
 
       - name: Generate audit report
         run: cargo audit --json > audit-report.json
@@ -59,14 +59,14 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # pinned master commit
         with:
           toolchain: ${{ env.RUST_VERSION }}
 
       - name: Install cargo-deny
-        uses: taiki-e/install-action@37f7c5781271959fb65b6b35224e28652ff2b63d # v2.87.0
+        uses: taiki-e/install-action@e407f7bafb71fd004bc5c2da3032e5470cbb6ef0 # v2.87.24
         with:
-          tool: cargo-deny
+          tool: cargo-deny@0.20.2
 
       - name: Check licenses
         run: cargo deny check licenses
@@ -99,19 +99,21 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # pinned master commit
         with:
           toolchain: ${{ env.RUST_VERSION }}
 
       - name: Install cargo-license
-        run: cargo install cargo-license
+        run: cargo install cargo-license --locked --version 0.7.0
 
       - name: Check licenses
         run: |
-          echo "## License Report" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          cargo license >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## License Report"
+            echo '```'
+            cargo license
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
           # Check for problematic licenses, but allow r-efi which is build-only
           PROBLEMATIC=$(cargo license | grep -E "(GPL|AGPL)" | grep -v "r-efi" | grep -v "LGPL-2.1-or-later OR MIT" || true)
@@ -134,25 +136,20 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # pinned master commit
         with:
           toolchain: ${{ env.RUST_VERSION }}
 
       - name: Install cargo-cyclonedx
-        uses: taiki-e/install-action@37f7c5781271959fb65b6b35224e28652ff2b63d # v2.87.0
+        uses: taiki-e/install-action@e407f7bafb71fd004bc5c2da3032e5470cbb6ef0 # v2.87.24
         with:
-          tool: cargo-cyclonedx@0.5.8
+          tool: cargo-cyclonedx@0.5.9
 
       - name: Generate SBOM
         run: |
           mkdir -p sbom
-          cargo cyclonedx --manifest-path Cargo.toml --format json --output-cdx || cargo cyclonedx --format json
-          find . -name '*.cdx.json' -not -path './target/*' -not -path './sbom/*' -exec cp {} sbom/ \; || true
-          # Fallback: if no cdx.json found, generate with default output
-          if [ -z "$(ls -A sbom/ 2>/dev/null)" ]; then
-            cargo cyclonedx --format json
-            find . -name '*.json' -path '*/bom*' -not -path './target/*' -exec cp {} sbom/ \; || true
-          fi
+          cargo cyclonedx --manifest-path Cargo.toml --all-features --format json --spec-version 1.5 --override-filename ollama-sdk-sbom
+          mv ollama-sdk-sbom.json sbom/ollama-sdk.cdx.json
 
       - name: Upload SBOM
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -174,7 +171,7 @@ jobs:
           fetch-depth: 0
 
       - name: TruffleHog Scan
-        uses: trufflesecurity/trufflehog@20652fbbdefffcdaa493a5bf57ab2ac6b1db715b # v3.97.1
+        uses: trufflesecurity/trufflehog@4dd8831c5f12599465d4d45c3c447b4018a34c85 # v3.97.9
         with:
           extra_args: --only-verified
         continue-on-error: true
