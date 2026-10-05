@@ -56,9 +56,11 @@ jobs:
     name: Create Dependency Update PR
     needs: update-dependencies
     runs-on: ubuntu-latest
+    # Only used when GIT_TOKEN is unavailable and create-pull-request falls back
+    # to GITHUB_TOKEN; this job runs no dependency code.
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write # push the deps/weekly-update branch
+      pull-requests: write # open or update the dependency PR
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
