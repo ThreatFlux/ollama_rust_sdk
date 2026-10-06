@@ -42,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `docker.yml` no longer builds a `chore: release vX.Y.Z` commit on `main` as well as on its tag
 - Replaced placeholder Cargo package metadata with the canonical ThreatFlux repository and
   documentation URLs
-- Each GitHub Release now carries a CycloneDX 1.5 SBOM of the crate
+- Each GitHub Release now carries a CycloneDX 1.5 SBOM of the crate covering every target platform
   (`ollama-cli-vX.Y.Z.cdx.json`) and its SHA-256 checksum next to the CLI archives
 - Refreshed `Cargo.lock`: h2 0.4.20, hyper 1.12.0, jiff 0.2.38 and want 0.3.2
 

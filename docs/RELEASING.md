@@ -48,7 +48,7 @@ The `v*` tag triggers `release.yml`:
 |------|----------|
 | Cross-compile | Linux x86_64/musl, macOS aarch64/x86_64, Windows x86_64 |
 | Package | `.tar.gz` (Unix) and `.zip` (Windows) with SHA256 checksums |
-| SBOM | `ollama-cli-vX.Y.Z.cdx.json` (CycloneDX 1.5, all features) with a SHA256 checksum |
+| SBOM | `ollama-cli-vX.Y.Z.cdx.json` (CycloneDX 1.5, all features, all targets) with a SHA256 checksum |
 | Publish | crates.io through trusted publishing (skipped when the version is already published) |
 | GitHub Release | Checksums, SBOM and packaged assets attached |
 
