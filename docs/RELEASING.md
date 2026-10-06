@@ -48,8 +48,15 @@ The `v*` tag triggers `release.yml`:
 |------|----------|
 | Cross-compile | Linux x86_64/musl, macOS aarch64/x86_64, Windows x86_64 |
 | Package | `.tar.gz` (Unix) and `.zip` (Windows) with SHA256 checksums |
+| SBOM | `ollama-cli-vX.Y.Z.cdx.json` (CycloneDX 1.5, all features) with a SHA256 checksum |
 | Publish | crates.io through trusted publishing (skipped when the version is already published) |
-| GitHub Release | Checksums + packaged assets attached |
+| GitHub Release | Checksums, SBOM and packaged assets attached |
+
+The release notes are the `## [X.Y.Z]` section of `docs/CHANGELOG.md` followed by GitHub's
+generated list of merged pull requests, so move the `[Unreleased]` entries under the new version
+before releasing. auto-release creates the Release first with notes that list only breaking,
+feat and fix commits; `release.yml` replaces that generated body (a bare `## Release vX.Y.Z`
+heading when there are none) and leaves any other notes alone.
 
 ### Required Permissions
 
