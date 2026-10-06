@@ -35,6 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Publish to crates.io through trusted publishing (GitHub OIDC in the `crates-io` environment)
   instead of a stored API token; a failed publish fails the release, and a re-run skips a
   version that is already on crates.io
+- Cut releases and open weekly dependency PRs as the `threatflux-automation` GitHub App, so the
+  release tag starts `release.yml` and `docker.yml` once each and dependency PR CI runs without
+  approval; the release automation is pinned to `ThreatFlux/github_actions` v0.7.7
 
 - Replaced placeholder Cargo package metadata with the canonical ThreatFlux repository and
   documentation URLs

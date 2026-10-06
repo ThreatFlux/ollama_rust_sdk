@@ -65,7 +65,7 @@ jobs:
     env:
       # The `secrets` context is not available to a step-level `if:`, so the
       # presence of the App key is surfaced here and the steps branch on it.
-      HAS_DEPS_APP_PRIVATE_KEY: ${{ secrets.DEPS_APP_PRIVATE_KEY != '' }}
+      HAS_APP_PRIVATE_KEY: ${{ secrets.TF_AUTOMATION_APP_PRIVATE_KEY != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -80,25 +80,26 @@ jobs:
 
       # A PR opened with GITHUB_TOKEN is authored by github-actions[bot] and its
       # pull_request runs wait at action_required until a maintainer approves
-      # them. When the optional GitHub App is configured (DEPS_APP_CLIENT_ID
-      # variable + DEPS_APP_PRIVATE_KEY secret), its installation token opens
-      # the PR instead so CI starts automatically. The token is limited to this
-      # repository with contents and pull-requests write. Without the App the
-      # workflow falls back to GITHUB_TOKEN. The org GIT_TOKEN PAT is not used
-      # because it fails authentication (HTTP 401).
+      # them. The threatflux-automation GitHub App (org variable
+      # TF_AUTOMATION_APP_ID + org secret TF_AUTOMATION_APP_PRIVATE_KEY) opens
+      # the PR instead, so it is authored by threatflux-automation[bot] and its
+      # CI starts automatically. The token is limited to this repository with
+      # contents and pull-requests write. If neither is visible to the
+      # repository the workflow falls back to GITHUB_TOKEN. The org GIT_TOKEN
+      # PAT is not used because it fails authentication (HTTP 401).
       - name: Validate dependency App configuration
-        if: (vars.DEPS_APP_CLIENT_ID == '') != (env.HAS_DEPS_APP_PRIVATE_KEY == 'false')
+        if: (vars.TF_AUTOMATION_APP_ID == '') != (env.HAS_APP_PRIVATE_KEY == 'false')
         run: |
-          echo "::error::DEPS_APP_CLIENT_ID and DEPS_APP_PRIVATE_KEY must be configured together"
+          echo "::error::TF_AUTOMATION_APP_ID and TF_AUTOMATION_APP_PRIVATE_KEY must be configured together"
           exit 1
 
       - name: Create GitHub App token
         id: app-token
-        if: vars.DEPS_APP_CLIENT_ID != '' && env.HAS_DEPS_APP_PRIVATE_KEY == 'true'
+        if: vars.TF_AUTOMATION_APP_ID != '' && env.HAS_APP_PRIVATE_KEY == 'true'
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          client-id: ${{ vars.DEPS_APP_CLIENT_ID }}
-          private-key: ${{ secrets.DEPS_APP_PRIVATE_KEY }}
+          client-id: ${{ vars.TF_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.TF_AUTOMATION_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
 

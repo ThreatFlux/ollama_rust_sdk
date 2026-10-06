@@ -6,8 +6,13 @@ Releases are driven by [Conventional Commits](https://www.conventionalcommits.or
 
 1. Analyzes commits since the last tag.
 2. Determines the version bump (patch / minor / major) from commit prefixes.
-3. Creates a new Git tag (`v*`).
-4. The tag triggers `release.yml`, which builds, packages, publishes, and creates the GitHub Release.
+3. Commits the version bump and pushes a new Git tag (`v*`) as the `threatflux-automation`
+   GitHub App.
+4. The tag push triggers `release.yml`, which builds, packages, publishes, and creates the GitHub
+   Release, and `docker.yml`, which publishes the container image. Each runs once per tag: the
+   reusable workflow (`ThreatFlux/github_actions` `reusable-auto-release.yml`) does not dispatch
+   them again when the App pushed the tag. It only dispatches them if the release falls back to
+   `GITHUB_TOKEN`, whose tag push starts no workflows.
 
 **No manual steps are required for routine releases.**
 
@@ -49,7 +54,8 @@ The `v*` tag triggers `release.yml`:
 
 | Credential | Holder | Purpose |
 |------------|--------|---------|
-| `GITHUB_TOKEN` | Automatic | Release tag, GitHub Release and assets |
+| `threatflux-automation` GitHub App (org variable `TF_AUTOMATION_APP_ID`, org secret `TF_AUTOMATION_APP_PRIVATE_KEY`) | `auto-release.yml` and `dependencies.yml` | Release commit and tag pushed so they trigger `release.yml`/`docker.yml`; weekly dependency PRs whose CI starts without approval |
+| `GITHUB_TOKEN` | Automatic | Release tag (manual dispatch), GitHub Release and assets |
 | GitHub OIDC (`id-token: write`) | `publish` job in the `crates-io` environment | Short-lived crates.io token |
 
 crates.io publishing uses [trusted publishing](https://crates.io/docs/trusted-publishing): the
@@ -65,6 +71,8 @@ Both release workflows can be rehearsed from `main` without tagging, releasing o
 
 ```bash
 # Report the version auto-release would cut; no commit, tag, release or dispatch.
+# Once the CI and Security gate passes it still mints the GitHub App token, so it
+# also checks the App configuration.
 gh workflow run auto-release.yml -f version_bump=auto -f dry_run=true
 
 # Build and package every target and run `cargo publish --dry-run --locked`
