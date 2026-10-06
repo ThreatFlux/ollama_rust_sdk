@@ -352,7 +352,7 @@ jobs:
           # A re-run of a release whose publish already succeeded must not fail on
           # "crate version already exists"; anything but 200/404 is an error.
           status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-            --retry 3 --retry-all-errors \
+            --connect-timeout 10 --max-time 30 --retry 3 --retry-all-errors \
             --user-agent "ThreatFlux-${CRATE_NAME}-release/${GITHUB_RUN_ID}" \
             "https://crates.io/api/v1/crates/${CRATE_NAME}/${VERSION}")"
           case "${status}" in
