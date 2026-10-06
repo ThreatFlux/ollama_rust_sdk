@@ -42,15 +42,22 @@ The `v*` tag triggers `release.yml`:
 |------|----------|
 | Cross-compile | Linux x86_64/musl, macOS aarch64/x86_64, Windows x86_64 |
 | Package | `.tar.gz` (Unix) and `.zip` (Windows) with SHA256 checksums |
-| Publish | crates.io (if `CRATES_IO_TOKEN` or `CARGO_REGISTRY_TOKEN` secret is set) |
+| Publish | crates.io through trusted publishing (skipped when the version is already published) |
 | GitHub Release | Checksums + packaged assets attached |
 
 ### Required Permissions
 
-| Secret | Holder | Purpose |
-|--------|--------|---------|
-| `GITHUB_TOKEN` | Automatic | Release assets |
-| `CRATES_IO_TOKEN` | Repo admin | crates.io publish |
+| Credential | Holder | Purpose |
+|------------|--------|---------|
+| `GITHUB_TOKEN` | Automatic | Release tag, GitHub Release and assets |
+| GitHub OIDC (`id-token: write`) | `publish` job in the `crates-io` environment | Short-lived crates.io token |
+
+crates.io publishing uses [trusted publishing](https://crates.io/docs/trusted-publishing): the
+crate's trusted publisher is `ThreatFlux/ollama_rust_sdk`, workflow `release.yml`, environment
+`crates-io`. `rust-lang/crates-io-auth-action` exchanges the job's OIDC identity for a short-lived
+token and revokes it when the job ends, so no crates.io API token is stored in GitHub. Renaming
+`release.yml` or the environment requires updating the trusted publisher on crates.io first. A
+failed publish fails the release run.
 
 ### Dry Run
 
@@ -65,7 +72,8 @@ gh workflow run auto-release.yml -f version_bump=auto -f dry_run=true
 gh workflow run release.yml -f version=1.2.3 -f dry_run=true
 ```
 
-A release dry run doesn't need an existing tag. If `version` is ahead of `Cargo.toml`,
+A release dry run doesn't use the `crates-io` environment or request a crates.io token.
+It doesn't need an existing tag. If `version` is ahead of `Cargo.toml`,
 as it is before auto-release commits the bump, it warns and builds the manifest version.
 Container images are built by `docker.yml`, which a dry run doesn't dispatch.
 

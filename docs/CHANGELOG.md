@@ -32,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is `gcr.io/distroless/cc-debian13:nonroot` (both digest-pinned), running as the distroless
   `nonroot` user (UID 65532) with `tini` as PID 1; CI now smoke-tests `--version`, `--help`,
   the non-root user and the embedded SBOM
+- Publish to crates.io through trusted publishing (GitHub OIDC in the `crates-io` environment)
+  instead of a stored API token; a failed publish fails the release, and a re-run skips a
+  version that is already on crates.io
 
 - Replaced placeholder Cargo package metadata with the canonical ThreatFlux repository and
   documentation URLs
