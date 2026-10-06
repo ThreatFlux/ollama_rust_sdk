@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added worktree-aware repository hook installation; aligned local feature, lint and MSRV checks
   with CI, and made security and dependency gate failures propagate
 - Updated the Docker certificate pin to match Bookworm and prevent the existing downgrade failure
+- Publish to crates.io through trusted publishing (GitHub OIDC in the `crates-io` environment)
+  instead of a stored API token; a failed publish fails the release, and a re-run skips a
+  version that is already on crates.io
 
 - Replaced placeholder Cargo package metadata with the canonical ThreatFlux repository and
   documentation URLs
