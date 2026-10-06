@@ -300,7 +300,7 @@ jobs:
           shopt -s nullglob globstar
           for file in artifacts/**/*; do
             if [ -f "$file" ]; then
-              gh release upload "v${VERSION}" "$file" --clobber
+              gh release upload "v${VERSION}" "$file" --repo "$GITHUB_REPOSITORY" --clobber
             fi
           done
         env:
