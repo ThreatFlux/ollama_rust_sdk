@@ -52,6 +52,23 @@ The `v*` tag triggers `release.yml`:
 | `GITHUB_TOKEN` | Automatic | Release assets |
 | `CRATES_IO_TOKEN` | Repo admin | crates.io publish |
 
+### Dry Run
+
+Both release workflows can be rehearsed from `main` without tagging, releasing or publishing:
+
+```bash
+# Report the version auto-release would cut; no commit, tag, release or dispatch.
+gh workflow run auto-release.yml -f version_bump=auto -f dry_run=true
+
+# Build and package every target and run `cargo publish --dry-run --locked`
+# without creating the tag or GitHub Release, uploading assets, or publishing.
+gh workflow run release.yml -f version=1.2.3 -f dry_run=true
+```
+
+A release dry run doesn't need an existing tag. If `version` is ahead of `Cargo.toml`,
+as it is before auto-release commits the bump, it warns and builds the manifest version.
+Container images are built by `docker.yml`, which a dry run doesn't dispatch.
+
 ### Rollback
 
 If a release is defective:
