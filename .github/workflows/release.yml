@@ -1,7 +1,7 @@
 name: Release
 
 permissions:
-  contents: write
+  contents: read
 
 on:
   push:
@@ -40,6 +40,8 @@ jobs:
   prepare:
     name: Prepare Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the release tag on workflow_dispatch
     outputs:
       version: ${{ steps.version.outputs.version }}
       source_ref: ${{ steps.release_ref.outputs.source_ref }}
@@ -157,11 +159,14 @@ jobs:
             target: x86_64-pc-windows-msvc
             artifact: windows-amd64
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           ref: ${{ needs.prepare.outputs.source_ref }}
 
       - name: Install Rust
@@ -239,10 +244,13 @@ jobs:
     needs: [prepare, build]
     if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the GitHub Release and upload its assets
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           ref: ${{ needs.prepare.outputs.source_ref }}
 
       - name: Generate release notes
@@ -308,10 +316,13 @@ jobs:
     if: >-
       (github.event_name == 'workflow_dispatch' && inputs.dry_run) ||
       !contains(needs.prepare.outputs.version, '-')
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           ref: ${{ needs.prepare.outputs.source_ref }}
 
       - name: Install Rust
