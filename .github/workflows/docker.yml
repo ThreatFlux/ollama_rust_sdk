@@ -30,6 +30,15 @@ jobs:
   build:
     name: Build Docker Image
     runs-on: ${{ vars.RUST_TEMPLATE_RUNNER_UBUNTU || 'ubuntu-latest' }}
+    # A release commit ("chore: release vX.Y.Z", from auto-release or the
+    # manual runbook) reaches main together with its vX.Y.Z tag, and the
+    # threatflux-automation App's pushes start workflows. The tag run builds
+    # and publishes that commit, so the main-branch run skips it rather than
+    # building the same SHA twice and racing to overwrite the shared SHA tag.
+    # scan and sign need this job, so they skip with it.
+    if: >-
+      !(github.event_name == 'push' && github.ref_type == 'branch' &&
+      startsWith(github.event.head_commit.message, 'chore: release v'))
     permissions:
       contents: read
       packages: write
