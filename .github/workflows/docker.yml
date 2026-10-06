@@ -203,10 +203,51 @@ jobs:
         if: github.event_name != 'pull_request'
         run: docker pull ${{ env.REGISTRY }}/${{ needs.build.outputs.image_name }}:${{ steps.sha.outputs.short }}
 
+      - name: Resolve image reference
+        id: image
+        env:
+          IMAGE_REF: ${{ github.event_name == 'pull_request' && format('{0}:scan', needs.build.outputs.image_name) || format('{0}/{1}:{2}', env.REGISTRY, needs.build.outputs.image_name, steps.sha.outputs.short) }}
+        run: echo "ref=${IMAGE_REF}" >> "$GITHUB_OUTPUT"
+
+      # The runtime is distroless (no shell), so the checks drive the entrypoint
+      # directly and copy the embedded SBOM out of a stopped container.
+      - name: Smoke test image
+        env:
+          IMAGE_REF: ${{ steps.image.outputs.ref }}
+        run: |
+          set -euo pipefail
+          image_user="$(docker image inspect --format '{{.Config.User}}' "${IMAGE_REF}")"
+          case "${image_user%%:*}" in
+            "" | 0 | root)
+              echo "::error::${IMAGE_REF} runs as root (User='${image_user}')"
+              exit 1
+              ;;
+          esac
+          echo "Runs as: ${image_user}"
+
+          version_output="$(docker run --rm "${IMAGE_REF}" --version)"
+          echo "${version_output}"
+          if [[ "${version_output}" != "ollama-cli "* ]]; then
+            echo "::error::unexpected --version output: ${version_output}"
+            exit 1
+          fi
+          docker run --rm "${IMAGE_REF}" --help
+
+          container="$(docker create "${IMAGE_REF}")"
+          trap 'docker rm -f "${container}" >/dev/null' EXIT
+          docker cp "${container}:/usr/share/doc/app/sbom.cdx.json" "${RUNNER_TEMP}/sbom.cdx.json"
+          python3 - "${RUNNER_TEMP}/sbom.cdx.json" <<'PY'
+          import json, sys
+          sbom = json.load(open(sys.argv[1], encoding="utf-8"))
+          if sbom.get("bomFormat") != "CycloneDX" or not sbom.get("components"):
+              raise SystemExit("embedded SBOM is not a populated CycloneDX document")
+          print(f"Embedded SBOM: CycloneDX {sbom.get('specVersion')}, {len(sbom['components'])} components")
+          PY
+
       - name: Run Trivy scanner
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: ${{ github.event_name == 'pull_request' && format('{0}:scan', needs.build.outputs.image_name) || format('{0}/{1}:{2}', env.REGISTRY, needs.build.outputs.image_name, steps.sha.outputs.short) }}
+          image-ref: ${{ steps.image.outputs.ref }}
           format: sarif
           output: trivy-results.sarif
           severity: CRITICAL,HIGH
