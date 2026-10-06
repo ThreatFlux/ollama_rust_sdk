@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added worktree-aware repository hook installation; aligned local feature, lint and MSRV checks
   with CI, and made security and dependency gate failures propagate
 - Updated the Docker certificate pin to match Bookworm and prevent the existing downgrade failure
+- Moved the container image off Debian 12: the builder is `rust:1.99.0-trixie` and the runtime
+  is `gcr.io/distroless/cc-debian13:nonroot` (both digest-pinned), running as the distroless
+  `nonroot` user (UID 65532) with `tini` as PID 1; CI now smoke-tests `--version`, `--help`,
+  the non-root user and the embedded SBOM
 - Publish to crates.io through trusted publishing (GitHub OIDC in the `crates-io` environment)
   instead of a stored API token; a failed publish fails the release, and a re-run skips a
   version that is already on crates.io

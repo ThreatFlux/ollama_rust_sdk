@@ -148,6 +148,13 @@ jobs:
         with:
           context: .
           push: false
+          load: true
           tags: ollama-rust-sdk:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Smoke test Docker image
+        run: |
+          set -euo pipefail
+          docker run --rm ollama-rust-sdk:test --version
+          docker run --rm ollama-rust-sdk:test --help
