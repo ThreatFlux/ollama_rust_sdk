@@ -239,13 +239,12 @@ jobs:
           path: "*.zip*"
           retention-days: 5
 
-  upload-assets:
-    name: Upload Release Assets
-    needs: [prepare, build]
-    if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
+  sbom:
+    name: Generate Release SBOM
+    needs: prepare
     runs-on: ubuntu-latest
     permissions:
-      contents: write # create the GitHub Release and upload its assets
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -253,15 +252,105 @@ jobs:
           persist-credentials: false
           ref: ${{ needs.prepare.outputs.source_ref }}
 
-      - name: Generate release notes
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # pinned master commit
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+
+      - name: Install cargo-cyclonedx
+        uses: taiki-e/install-action@e407f7bafb71fd004bc5c2da3032e5470cbb6ef0 # v2.87.24
+        with:
+          tool: cargo-cyclonedx@0.5.9
+
+      # Same generator and spec version as the SBOM embedded in the container
+      # image (Dockerfile) and the Security workflow's SBOM. cargo-cyclonedx
+      # defaults to the host target; the release ships Linux, macOS and Windows
+      # binaries, so `--target all` keeps every platform's dependencies.
+      - name: Generate SBOM
         env:
           VERSION: ${{ needs.prepare.outputs.version }}
         run: |
-          echo "## Release v$VERSION" > release_notes.md
-          echo "" >> release_notes.md
-          if [ -f CHANGELOG.md ]; then
-            awk "/## \[$VERSION\]/,/## \[/" CHANGELOG.md | sed '1d;$d' >> release_notes.md 2>/dev/null || echo "See CHANGELOG.md for details" >> release_notes.md
+          set -euo pipefail
+          sbom="${BINARY_NAME}-v${VERSION}.cdx.json"
+          cargo cyclonedx --manifest-path Cargo.toml --all-features --target all --format json \
+            --spec-version 1.5 --override-filename "${BINARY_NAME}-sbom"
+          mkdir -p sbom
+          mv "${BINARY_NAME}-sbom.json" "sbom/${sbom}"
+          python3 - "sbom/${sbom}" <<'PY'
+          import json, sys
+          sbom = json.load(open(sys.argv[1], encoding="utf-8"))
+          if sbom.get("bomFormat") != "CycloneDX" or not sbom.get("components"):
+              raise SystemExit("release SBOM is not a populated CycloneDX document")
+          print(f"Release SBOM: CycloneDX {sbom.get('specVersion')}, {len(sbom['components'])} components")
+          PY
+          cd sbom
+          shasum -a 256 "${sbom}" > "${sbom}.sha256"
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-sbom
+          path: sbom/*
+          retention-days: 5
+
+  upload-assets:
+    name: Upload Release Assets
+    needs: [prepare, build, sbom]
+    if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the GitHub Release, generate its notes and upload its assets
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ needs.prepare.outputs.source_ref }}
+
+      # The notes are the version's docs/CHANGELOG.md section followed by
+      # GitHub's generated list of merged pull requests and compare link.
+      - name: Generate release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          set -euo pipefail
+          TAG="v${VERSION}"
+          printf '## Release %s\n\n' "${TAG}" > release_notes.md
+
+          changelog=""
+          for candidate in CHANGELOG.md docs/CHANGELOG.md; do
+            if [[ -f "${candidate}" ]]; then
+              changelog="${candidate}"
+              break
+            fi
+          done
+          : > changelog_section.md
+          if [[ -n "${changelog}" ]]; then
+            # Body of the "## [VERSION]" section, up to the next "## " heading or
+            # the link reference definitions at the end of the file.
+            awk -v header="## [${VERSION}]" '
+              !found && index($0, header) == 1 { found = 1; next }
+              !found { next }
+              /^## / || /^\[.*\]: / { exit }
+              !started && /^[[:space:]]*$/ { next }
+              { started = 1; print }
+            ' "${changelog}" > changelog_section.md
           fi
+          if [[ -s changelog_section.md ]]; then
+            cat changelog_section.md >> release_notes.md
+            printf '\n' >> release_notes.md
+          else
+            echo "::warning::No '## [${VERSION}]' section in ${changelog:-CHANGELOG.md}"
+          fi
+
+          if gh api --method POST "repos/${GITHUB_REPOSITORY}/releases/generate-notes" \
+            -f tag_name="${TAG}" --jq .body > generated_notes.md; then
+            cat generated_notes.md >> release_notes.md
+          else
+            echo "::warning::GitHub could not generate the pull request list for ${TAG}"
+          fi
+          cat release_notes.md
 
       - name: Create or update GitHub Release
         env:
@@ -269,6 +358,7 @@ jobs:
           VERSION: ${{ needs.prepare.outputs.version }}
           PRERELEASE_INPUT: ${{ inputs.prerelease }}
         run: |
+          set -euo pipefail
           TAG="v${VERSION}"
           TITLE="Release v${VERSION}"
           IS_PRERELEASE="false"
@@ -279,8 +369,31 @@ jobs:
             IS_PRERELEASE="true"
           fi
 
+          # auto-release creates the Release before this runs, with notes that
+          # list only breaking, feat and fix commits: just the heading when the
+          # release has none of those. Replace that generated body (or an empty
+          # one); keep anything else, so a re-run never overwrites notes a
+          # maintainer or an earlier run wrote.
+          generated_by_auto_release() {
+            local lines rest
+            lines="$(printf '%s\n' "$1" | tr -d '\r' | sed '/^[[:space:]]*$/d')"
+            [[ -z "${lines}" ]] && return 0
+            [[ "$(head -n 1 <<< "${lines}")" == "## Release ${TAG}" ]] || return 1
+            rest="$(tail -n +2 <<< "${lines}")"
+            [[ -z "${rest}" ]] && return 0
+            ! grep -Evq \
+              '^(### (Breaking Changes|Features|Bug Fixes)|- .+ \([0-9a-f]{7,40}\)|_Note: the commit list was truncated; some changes may be missing\._)$' \
+              <<< "${rest}"
+          }
+
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TITLE" --notes-file release_notes.md
+            body="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body)"
+            if generated_by_auto_release "${body}"; then
+              gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TITLE" --notes-file release_notes.md
+            else
+              echo "Keeping the existing ${TAG} release notes"
+              gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TITLE"
+            fi
           else
             if [[ "${IS_PRERELEASE}" == "true" ]]; then
               gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TITLE" --notes-file release_notes.md --prerelease
