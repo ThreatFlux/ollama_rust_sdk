@@ -12,7 +12,8 @@ Releases are driven by [Conventional Commits](https://www.conventionalcommits.or
    Release, and `docker.yml`, which publishes the container image. Each runs once per tag: the
    reusable workflow (`ThreatFlux/github_actions` `reusable-auto-release.yml`) does not dispatch
    them again when the App pushed the tag. It only dispatches them if the release falls back to
-   `GITHUB_TOKEN`, whose tag push starts no workflows.
+   `GITHUB_TOKEN`, whose tag push starts no workflows. The release commit's push to `main` runs
+   CI as usual, but `docker.yml` skips its branch build: the tag run builds that commit.
 
 **No manual steps are required for routine releases.**
 

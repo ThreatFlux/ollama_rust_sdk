@@ -37,7 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   version that is already on crates.io
 - Cut releases and open weekly dependency PRs as the `threatflux-automation` GitHub App, so the
   release tag starts `release.yml` and `docker.yml` once each and dependency PR CI runs without
-  approval; the release automation is pinned to `ThreatFlux/github_actions` v0.7.7
+  approval; the release automation is pinned to `ThreatFlux/github_actions` v0.7.7, and
+  `docker.yml` no longer builds a `chore: release vX.Y.Z` commit on `main` as well as on its tag
 
 - Replaced placeholder Cargo package metadata with the canonical ThreatFlux repository and
   documentation URLs
