@@ -1,6 +1,6 @@
 [package]
 name = "ollama_rust_sdk"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2024"
 rust-version = "1.97.1"
 description = "Async Rust client and CLI for supported Ollama API endpoints"
