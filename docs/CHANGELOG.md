@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `release.yml` writes the Windows archive's `.sha256` file with an LF line ending, like the Unix
+  archives' files. The `ollama-cli-windows-amd64.zip.sha256` assets of 0.1.5 and 0.1.6 end in CRLF,
+  so `shasum -a 256 -c` and macOS `sha256sum -c` report the archive as missing; check one with
+  `tr -d '\r' < ollama-cli-windows-amd64.zip.sha256 | shasum -a 256 -c` (the hash itself is correct).
+
 ## [0.1.6] - 2026-10-06
 
 ### Documentation
