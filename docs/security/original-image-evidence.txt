@@ -1,0 +1,454 @@
+## amd64 ghcr.io/threatflux/ollama_rust_sdk@sha256:c080d060b4eade83a07495d36ef53000d68724a49b6bde7be8ce0073a71f54c4
+nscd executable files: []
+PBDS headers: []
+Package: libstdc++6
+Source: gcc-14
+Version: 14.2.0-19
+Architecture: amd64
+Package: libgomp1
+Source: gcc-14
+Version: 14.2.0-19
+Architecture: amd64
+Package: libgcc-s1
+Source: gcc-14
+Version: 14.2.0-19
+Architecture: amd64
+Package: gcc-14-base
+Source: gcc-14
+Version: 14.2.0-19
+Architecture: amd64
+Package: libc6
+Source: glibc
+Version: 2.41-12+deb13u4
+Architecture: amd64
+Package: zlib1g
+Source: zlib (1:1.3.dfsg+really1.3.1-1)
+Version: 1:1.3.dfsg+really1.3.1-1+b1
+Architecture: amd64
+Package: ca-certificates
+Version: 20250419
+Architecture: all
+usr/local/bin/ollama-cli
+/tmp/ollama-original-amd64/usr/local/bin/ollama-cli:	file format elf64-x86-64
+
+Program Header:
+    PHDR off    0x0000000000000040 vaddr 0x0000000000000040 paddr 0x0000000000000040 align 2**3
+         filesz 0x00000000000002a0 memsz 0x00000000000002a0 flags r--
+  INTERP off    0x00000000000002e0 vaddr 0x00000000000002e0 paddr 0x00000000000002e0 align 2**0
+         filesz 0x000000000000001c memsz 0x000000000000001c flags r--
+    LOAD off    0x0000000000000000 vaddr 0x0000000000000000 paddr 0x0000000000000000 align 2**12
+         filesz 0x0000000000163360 memsz 0x0000000000163360 flags r--
+    LOAD off    0x0000000000163380 vaddr 0x0000000000164380 paddr 0x0000000000164380 align 2**12
+         filesz 0x0000000000512030 memsz 0x0000000000512030 flags r-x
+    LOAD off    0x00000000006753b0 vaddr 0x00000000006773b0 paddr 0x00000000006773b0 align 2**12
+         filesz 0x0000000000025240 memsz 0x0000000000025c50 flags rw-
+    LOAD off    0x000000000069a5f0 vaddr 0x000000000069d5f0 paddr 0x000000000069d5f0 align 2**12
+         filesz 0x0000000000000b8c memsz 0x0000000000004544 flags rw-
+    TLS off    0x00000000006753b0 vaddr 0x00000000006773b0 paddr 0x00000000006773b0 align 2**3
+         filesz 0x00000000000000a0 memsz 0x0000000000000120 flags r--
+ DYNAMIC off    0x00000000006999c8 vaddr 0x000000000069b9c8 paddr 0x000000000069b9c8 align 2**3
+         filesz 0x00000000000001d0 memsz 0x00000000000001d0 flags rw-
+   RELRO off    0x00000000006753b0 vaddr 0x00000000006773b0 paddr 0x00000000006773b0 align 2**0
+         filesz 0x0000000000025240 memsz 0x0000000000025c50 flags r--
+EH_FRAME off    0x000000000010578c vaddr 0x000000000010578c paddr 0x000000000010578c align 2**2
+         filesz 0x000000000000cb64 memsz 0x000000000000cb64 flags r--
+   STACK off    0x0000000000000000 vaddr 0x0000000000000000 paddr 0x0000000000000000 align 2**64
+         filesz 0x0000000000000000 memsz 0x0000000000000000 flags rw-
+    NOTE off    0x00000000000002fc vaddr 0x00000000000002fc paddr 0x00000000000002fc align 2**2
+         filesz 0x0000000000000044 memsz 0x0000000000000044 flags r--
+
+Dynamic Section:
+  NEEDED       libgcc_s.so.1
+  NEEDED       libm.so.6
+  NEEDED       libc.so.6
+  FLAGS        0x0000000000000008
+  FLAGS_1      0x0000000008000001
+  DEBUG        0x0000000000000000
+  RELA         0x0000000000001a30
+  RELASZ       0x0000000000036a68
+  RELAENT      0x0000000000000018
+  RELACOUNT    0x0000000000002403
+  JMPREL       0x0000000000038498
+  PLTRELSZ     0x00000000000004c8
+  PLTGOT       0x000000000069c440
+  PLTREL       0x0000000000000007
+  SYMTAB       0x0000000000000340
+  SYMENT       0x0000000000000018
+  STRTAB       0x00000000000012ac
+  STRSZ        0x0000000000000780
+  GNU_HASH     0x0000000000001290
+  INIT_ARRAY   0x0000000000677468
+  INIT_ARRAYSZ 0x0000000000000018
+  FINI_ARRAY   0x0000000000677450
+  FINI_ARRAYSZ 0x0000000000000018
+  INIT         0x0000000000676048
+  FINI         0x0000000000676060
+  VERSYM       0x0000000000001000
+  VERNEED      0x0000000000001110
+  VERNEEDNUM   0x0000000000000003
+
+Version References:
+  required from libgcc_s.so.1:
+    0x0b792650 0x00 05 GCC_3.0
+    0x0b792653 0x00 10 GCC_3.3
+    0x09276060 0x00 08 GCC_4.2.0
+  required from libm.so.6:
+    0x06969189 0x00 21 GLIBC_2.29
+  required from libc.so.6:
+    0x09691a75 0x00 03 GLIBC_2.2.5
+    0x0d696913 0x00 12 GLIBC_2.3
+    0x09691972 0x00 07 GLIBC_2.3.2
+    0x09691974 0x00 14 GLIBC_2.3.4
+    0x0d696917 0x00 20 GLIBC_2.7
+    0x0d696919 0x00 19 GLIBC_2.9
+    0x06969194 0x00 04 GLIBC_2.14
+    0x06969196 0x00 17 GLIBC_2.16
+    0x06969197 0x00 16 GLIBC_2.17
+    0x06969198 0x02 15 GLIBC_2.18
+    0x06969185 0x02 18 GLIBC_2.25
+    0x06969188 0x02 13 GLIBC_2.28
+    0x069691b0 0x02 09 GLIBC_2.30
+    0x069691b2 0x00 06 GLIBC_2.32
+    0x069691b3 0x00 11 GLIBC_2.33
+    0x069691b4 0x00 02 GLIBC_2.34
+    0x069691b8 0x00 22 GLIBC_2.38
+
+usr/bin/tini
+/tmp/ollama-original-amd64/usr/bin/tini:	file format elf64-x86-64
+
+Program Header:
+    PHDR off    0x0000000000000040 vaddr 0x0000000000000040 paddr 0x0000000000000040 align 2**3
+         filesz 0x0000000000000310 memsz 0x0000000000000310 flags r--
+  INTERP off    0x0000000000000394 vaddr 0x0000000000000394 paddr 0x0000000000000394 align 2**0
+         filesz 0x000000000000001c memsz 0x000000000000001c flags r--
+    LOAD off    0x0000000000000000 vaddr 0x0000000000000000 paddr 0x0000000000000000 align 2**12
+         filesz 0x00000000000014b8 memsz 0x00000000000014b8 flags r--
+    LOAD off    0x0000000000002000 vaddr 0x0000000000002000 paddr 0x0000000000002000 align 2**12
+         filesz 0x0000000000001be5 memsz 0x0000000000001be5 flags r-x
+    LOAD off    0x0000000000004000 vaddr 0x0000000000004000 paddr 0x0000000000004000 align 2**12
+         filesz 0x0000000000001090 memsz 0x0000000000001090 flags r--
+    LOAD off    0x0000000000005b10 vaddr 0x0000000000006b10 paddr 0x0000000000006b10 align 2**12
+         filesz 0x000000000000097b memsz 0x0000000000000a30 flags rw-
+ DYNAMIC off    0x0000000000005ce0 vaddr 0x0000000000006ce0 paddr 0x0000000000006ce0 align 2**3
+         filesz 0x00000000000001f0 memsz 0x00000000000001f0 flags rw-
+    NOTE off    0x0000000000000350 vaddr 0x0000000000000350 paddr 0x0000000000000350 align 2**3
+         filesz 0x0000000000000020 memsz 0x0000000000000020 flags r--
+    NOTE off    0x0000000000000370 vaddr 0x0000000000000370 paddr 0x0000000000000370 align 2**2
+         filesz 0x0000000000000024 memsz 0x0000000000000024 flags r--
+    NOTE off    0x0000000000005070 vaddr 0x0000000000005070 paddr 0x0000000000005070 align 2**2
+         filesz 0x0000000000000020 memsz 0x0000000000000020 flags r--
+PROPERTY off    0x0000000000000350 vaddr 0x0000000000000350 paddr 0x0000000000000350 align 2**3
+         filesz 0x0000000000000020 memsz 0x0000000000000020 flags r--
+EH_FRAME off    0x0000000000004c50 vaddr 0x0000000000004c50 paddr 0x0000000000004c50 align 2**2
+         filesz 0x000000000000009c memsz 0x000000000000009c flags r--
+   STACK off    0x0000000000000000 vaddr 0x0000000000000000 paddr 0x0000000000000000 align 2**4
+         filesz 0x0000000000000000 memsz 0x0000000000000000 flags rw-
+   RELRO off    0x0000000000005b10 vaddr 0x0000000000006b10 paddr 0x0000000000006b10 align 2**0
+         filesz 0x00000000000004f0 memsz 0x00000000000004f0 flags r--
+
+Dynamic Section:
+  NEEDED       libc.so.6
+  INIT         0x0000000000002000
+  FINI         0x0000000000003bdc
+  INIT_ARRAY   0x0000000000006b10
+  INIT_ARRAYSZ 0x0000000000000008
+  FINI_ARRAY   0x0000000000006b18
+  FINI_ARRAYSZ 0x0000000000000008
+  GNU_HASH     0x00000000000003b0
+  STRTAB       0x0000000000000a80
+  SYMTAB       0x0000000000000498
+  STRSZ        0x00000000000002dc
+  SYMENT       0x0000000000000018
+  DEBUG        0x0000000000000000
+  PLTGOT       0x0000000000006ed0
+  PLTRELSZ     0x00000000000002b8
+  PLTREL       0x0000000000000007
+  JMPREL       0x0000000000001200
+  RELA         0x0000000000000e40
+  RELASZ       0x00000000000003c0
+  RELAENT      0x0000000000000018
+  FLAGS        0x0000000000000008
+  FLAGS_1      0x0000000008000001
+  VERNEED      0x0000000000000de0
+  VERNEEDNUM   0x0000000000000001
+  VERSYM       0x0000000000000d5c
+  RELACOUNT    0x000000000000001f
+
+Version References:
+  required from libc.so.6:
+    0x09691974 0x00 06 GLIBC_2.3.4
+    0x069691b8 0x00 05 GLIBC_2.38
+    0x06969194 0x00 04 GLIBC_2.14
+    0x069691b4 0x00 03 GLIBC_2.34
+    0x09691a75 0x00 02 GLIBC_2.2.5
+
+
+/tmp/ollama-original-amd64/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+00000000000b3c20 <_ZnwmSt11align_val_t>:
+   b3c20: f3 0f 1e fa                  	endbr64
+   b3c24: 41 54                        	pushq	%r12
+   b3c26: 48 8d 46 ff                  	leaq	-0x1(%rsi), %rax
+   b3c2a: 48 89 f2                     	movq	%rsi, %rdx
+   b3c2d: 55                           	pushq	%rbp
+   b3c2e: 48 31 c2                     	xorq	%rax, %rdx
+   b3c31: 53                           	pushq	%rbx
+   b3c32: 48 83 ec 10                  	subq	$0x10, %rsp
+   b3c36: 48 39 d0                     	cmpq	%rdx, %rax
+   b3c39: 0f 83 3c da fe ff            	jae	0xa167b <_ZSt10unexpectedv+0x92>
+   b3c3f: 48 85 ff                     	testq	%rdi, %rdi
+   b3c42: b8 01 00 00 00               	movl	$0x1, %eax
+   b3c47: 4c 8d 64 24 08               	leaq	0x8(%rsp), %r12
+   b3c4c: 48 0f 45 c7                  	cmovneq	%rdi, %rax
+   b3c50: 48 89 c5                     	movq	%rax, %rbp
+   b3c53: b8 08 00 00 00               	movl	$0x8, %eax
+   b3c58: 48 39 c6                     	cmpq	%rax, %rsi
+   b3c5b: 48 0f 43 c6                  	cmovaeq	%rsi, %rax
+   b3c5f: 48 89 c3                     	movq	%rax, %rbx
+   b3c62: eb 14                        	jmp	0xb3c78 <_ZnwmSt11align_val_t+0x58>
+   b3c64: 0f 1f 40 00                  	nopl	(%rax)
+   b3c68: e8 43 a2 fe ff               	callq	0x9deb0 <_ZSt15get_new_handlerv@plt>
+   b3c6d: 48 85 c0                     	testq	%rax, %rax
+   b3c70: 0f 84 33 da fe ff            	je	0xa16a9 <_ZSt10unexpectedv+0xc0>
+   b3c76: ff d0                        	callq	*%rax
+   b3c78: 48 89 ea                     	movq	%rbp, %rdx
+   b3c7b: 48 89 de                     	movq	%rbx, %rsi
+   b3c7e: 4c 89 e7                     	movq	%r12, %rdi
+   b3c81: e8 ca 99 fe ff               	callq	0x9d650 <posix_memalign@plt>
+   b3c86: 85 c0                        	testl	%eax, %eax
+   b3c88: 75 de                        	jne	0xb3c68 <_ZnwmSt11align_val_t+0x48>
+   b3c8a: 48 8b 44 24 08               	movq	0x8(%rsp), %rax
+   b3c8f: 48 85 c0                     	testq	%rax, %rax
+   b3c92: 74 d4                        	je	0xb3c68 <_ZnwmSt11align_val_t+0x48>
+   b3c94: 48 83 c4 10                  	addq	$0x10, %rsp
+   b3c98: 5b                           	popq	%rbx
+   b3c99: 5d                           	popq	%rbp
+   b3c9a: 41 5c                        	popq	%r12
+   b3c9c: c3                           	retq
+   b3c9d: 0f 1f 00                     	nopl	(%rax)
+
+## arm64 ghcr.io/threatflux/ollama_rust_sdk@sha256:8978abda6f23fede8c4089cbaddab7a901defe505680d2876e36919560170b18
+nscd executable files: []
+PBDS headers: []
+Package: libstdc++6
+Source: gcc-14
+Version: 14.2.0-19
+Architecture: arm64
+Package: libgomp1
+Source: gcc-14
+Version: 14.2.0-19
+Architecture: arm64
+Package: libgcc-s1
+Source: gcc-14
+Version: 14.2.0-19
+Architecture: arm64
+Package: gcc-14-base
+Source: gcc-14
+Version: 14.2.0-19
+Architecture: arm64
+Package: libc6
+Source: glibc
+Version: 2.41-12+deb13u4
+Architecture: arm64
+Package: zlib1g
+Source: zlib (1:1.3.dfsg+really1.3.1-1)
+Version: 1:1.3.dfsg+really1.3.1-1+b1
+Architecture: arm64
+Package: ca-certificates
+Version: 20250419
+Architecture: all
+usr/local/bin/ollama-cli
+/tmp/ollama-original-arm64/usr/local/bin/ollama-cli:	file format elf64-littleaarch64
+
+Program Header:
+    PHDR off    0x0000000000000040 vaddr 0x0000000000000040 paddr 0x0000000000000040 align 2**3
+         filesz 0x0000000000000268 memsz 0x0000000000000268 flags r--
+  INTERP off    0x00000000000002cc vaddr 0x00000000000002cc paddr 0x00000000000002cc align 2**0
+         filesz 0x000000000000001b memsz 0x000000000000001b flags r--
+    LOAD off    0x0000000000000000 vaddr 0x0000000000000000 paddr 0x0000000000000000 align 2**16
+         filesz 0x00000000004fe2e0 memsz 0x00000000004fe2e0 flags r-x
+    LOAD off    0x000000000050b760 vaddr 0x000000000050b760 paddr 0x000000000050b760 align 2**16
+         filesz 0x00000000000253f4 memsz 0x0000000000028948 flags rw-
+ DYNAMIC off    0x000000000052f6e8 vaddr 0x000000000052f6e8 paddr 0x000000000052f6e8 align 2**3
+         filesz 0x0000000000000210 memsz 0x0000000000000210 flags rw-
+    NOTE off    0x00000000000002a8 vaddr 0x00000000000002a8 paddr 0x00000000000002a8 align 2**2
+         filesz 0x0000000000000024 memsz 0x0000000000000024 flags r--
+    NOTE off    0x00000000004fe2c0 vaddr 0x00000000004fe2c0 paddr 0x00000000004fe2c0 align 2**2
+         filesz 0x0000000000000020 memsz 0x0000000000000020 flags r--
+    TLS off    0x000000000050b760 vaddr 0x000000000050b760 paddr 0x000000000050b760 align 2**3
+         filesz 0x00000000000000a0 memsz 0x0000000000000120 flags r--
+EH_FRAME off    0x000000000049c760 vaddr 0x000000000049c760 paddr 0x000000000049c760 align 2**2
+         filesz 0x000000000000c0cc memsz 0x000000000000c0cc flags r--
+   STACK off    0x0000000000000000 vaddr 0x0000000000000000 paddr 0x0000000000000000 align 2**4
+         filesz 0x0000000000000000 memsz 0x0000000000000000 flags rw-
+   RELRO off    0x000000000050b760 vaddr 0x000000000050b760 paddr 0x000000000050b760 align 2**0
+         filesz 0x00000000000248a0 memsz 0x00000000000248a0 flags r--
+
+Dynamic Section:
+  NEEDED       libgcc_s.so.1
+  NEEDED       libm.so.6
+  NEEDED       libc.so.6
+  INIT         0x0000000000037130
+  FINI         0x00000000003abf1c
+  INIT_ARRAY   0x000000000050b800
+  INIT_ARRAYSZ 0x0000000000000028
+  FINI_ARRAY   0x000000000050b828
+  FINI_ARRAYSZ 0x0000000000000018
+  GNU_HASH     0x00000000000002e8
+  STRTAB       0x0000000000000fe0
+  SYMTAB       0x0000000000000308
+  STRSZ        0x0000000000000700
+  SYMENT       0x0000000000000018
+  DEBUG        0x0000000000000000
+  PLTGOT       0x000000000052f8f8
+  PLTRELSZ     0x0000000000000c48
+  PLTREL       0x0000000000000007
+  JMPREL       0x00000000000364e8
+  RELA         0x00000000000018f8
+  RELASZ       0x0000000000034bf0
+  RELAENT      0x0000000000000018
+  FLAGS        0x0000000000000008
+  FLAGS_1      0x0000000008000001
+  VERNEED      0x00000000000017f8
+  VERNEEDNUM   0x0000000000000003
+  VERSYM       0x00000000000016e0
+  RELACOUNT    0x0000000000002319
+
+Version References:
+  required from libm.so.6:
+    0x06969189 0x00 14 GLIBC_2.29
+  required from libgcc_s.so.1:
+    0x09276060 0x00 12 GCC_4.2.0
+    0x0b792653 0x00 09 GCC_3.3
+    0x0b792650 0x00 04 GCC_3.0
+  required from libc.so.6:
+    0x06969188 0x00 13 GLIBC_2.28
+    0x069691b0 0x00 11 GLIBC_2.30
+    0x069691b8 0x00 10 GLIBC_2.38
+    0x06969185 0x00 08 GLIBC_2.25
+    0x06969198 0x00 07 GLIBC_2.18
+    0x069691b3 0x00 06 GLIBC_2.33
+    0x069691b2 0x00 05 GLIBC_2.32
+    0x069691b4 0x00 03 GLIBC_2.34
+    0x06969197 0x00 02 GLIBC_2.17
+
+usr/bin/tini
+/tmp/ollama-original-arm64/usr/bin/tini:	file format elf64-littleaarch64
+
+Program Header:
+    PHDR off    0x0000000000000040 vaddr 0x0000000000000040 paddr 0x0000000000000040 align 2**3
+         filesz 0x00000000000002a0 memsz 0x00000000000002a0 flags r--
+  INTERP off    0x0000000000000324 vaddr 0x0000000000000324 paddr 0x0000000000000324 align 2**0
+         filesz 0x000000000000001b memsz 0x000000000000001b flags r--
+    LOAD off    0x0000000000000000 vaddr 0x0000000000000000 paddr 0x0000000000000000 align 2**16
+         filesz 0x0000000000004620 memsz 0x0000000000004620 flags r-x
+    LOAD off    0x000000000000fac0 vaddr 0x000000000001fac0 paddr 0x000000000001fac0 align 2**16
+         filesz 0x00000000000009c0 memsz 0x0000000000000a10 flags rw-
+ DYNAMIC off    0x000000000000fc90 vaddr 0x000000000001fc90 paddr 0x000000000001fc90 align 2**3
+         filesz 0x0000000000000200 memsz 0x0000000000000200 flags rw-
+    NOTE off    0x00000000000002e0 vaddr 0x00000000000002e0 paddr 0x00000000000002e0 align 2**3
+         filesz 0x0000000000000020 memsz 0x0000000000000020 flags r--
+    NOTE off    0x0000000000000300 vaddr 0x0000000000000300 paddr 0x0000000000000300 align 2**2
+         filesz 0x0000000000000024 memsz 0x0000000000000024 flags r--
+    NOTE off    0x0000000000004600 vaddr 0x0000000000004600 paddr 0x0000000000004600 align 2**2
+         filesz 0x0000000000000020 memsz 0x0000000000000020 flags r--
+PROPERTY off    0x00000000000002e0 vaddr 0x00000000000002e0 paddr 0x00000000000002e0 align 2**3
+         filesz 0x0000000000000020 memsz 0x0000000000000020 flags r--
+EH_FRAME off    0x0000000000004124 vaddr 0x0000000000004124 paddr 0x0000000000004124 align 2**2
+         filesz 0x00000000000000ac memsz 0x00000000000000ac flags r--
+   STACK off    0x0000000000000000 vaddr 0x0000000000000000 paddr 0x0000000000000000 align 2**4
+         filesz 0x0000000000000000 memsz 0x0000000000000000 flags rw-
+   RELRO off    0x000000000000fac0 vaddr 0x000000000001fac0 paddr 0x000000000001fac0 align 2**0
+         filesz 0x0000000000000540 memsz 0x0000000000000540 flags r--
+
+Dynamic Section:
+  NEEDED          libc.so.6
+  INIT            0x0000000000001548
+  FINI            0x0000000000003508
+  INIT_ARRAY      0x000000000001fac0
+  INIT_ARRAYSZ    0x0000000000000008
+  FINI_ARRAY      0x000000000001fac8
+  FINI_ARRAYSZ    0x0000000000000008
+  GNU_HASH        0x0000000000000340
+  STRTAB          0x0000000000000ab8
+  SYMTAB          0x0000000000000428
+  STRSZ           0x00000000000002ec
+  SYMENT          0x0000000000000018
+  DEBUG           0x0000000000000000
+  PLTGOT          0x000000000001fe90
+  PLTRELSZ        0x0000000000000318
+  PLTREL          0x0000000000000007
+  JMPREL          0x0000000000001230
+  RELA            0x0000000000000e70
+  RELASZ          0x00000000000003c0
+  RELAENT         0x0000000000000018
+  AARCH64_BTI_PLT 0x0000000000000000
+  FLAGS           0x0000000000000008
+  FLAGS_1         0x0000000008000001
+  VERNEED         0x0000000000000e30
+  VERNEEDNUM      0x0000000000000001
+  VERSYM          0x0000000000000da4
+  RELACOUNT       0x0000000000000020
+
+Version References:
+  required from libc.so.6:
+    0x069691b8 0x00 04 GLIBC_2.38
+    0x069691b4 0x00 03 GLIBC_2.34
+    0x06969197 0x00 02 GLIBC_2.17
+
+
+/tmp/ollama-original-arm64/usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+00000000000aa1c0 <_ZnwmSt11align_val_t>:
+   aa1c0: d503233f     	paciasp
+   aa1c4: a9bc7bfd     	stp	x29, x30, [sp, #-0x40]!
+   aa1c8: d1000422     	sub	x2, x1, #0x1
+   aa1cc: ca020023     	eor	x3, x1, x2
+   aa1d0: 910003fd     	mov	x29, sp
+   aa1d4: a90153f3     	stp	x19, x20, [sp, #0x10]
+   aa1d8: f90013f5     	str	x21, [sp, #0x20]
+   aa1dc: eb02007f     	cmp	x3, x2
+   aa1e0: 540002e9     	b.ls	0xaa23c <_ZnwmSt11align_val_t+0x7c>
+   aa1e4: f100001f     	cmp	x0, #0x0
+   aa1e8: d2800102     	mov	x2, #0x8                // =8
+   aa1ec: 9a9f1414     	csinc	x20, x0, xzr, ne
+   aa1f0: eb02003f     	cmp	x1, x2
+   aa1f4: 9a822033     	csel	x19, x1, x2, hs
+   aa1f8: 9100e3f5     	add	x21, sp, #0x38
+   aa1fc: 14000004     	b	0xaa20c <_ZnwmSt11align_val_t+0x4c>
+   aa200: 97ffcc70     	bl	0x9d3c0 <_ZSt15get_new_handlerv@plt>
+   aa204: b40001c0     	cbz	x0, 0xaa23c <_ZnwmSt11align_val_t+0x7c>
+   aa208: d63f0000     	blr	x0
+   aa20c: aa1403e2     	mov	x2, x20
+   aa210: aa1303e1     	mov	x1, x19
+   aa214: aa1503e0     	mov	x0, x21
+   aa218: 97ffcbee     	bl	0x9d1d0 <posix_memalign@plt>
+   aa21c: 35ffff20     	cbnz	w0, 0xaa200 <_ZnwmSt11align_val_t+0x40>
+   aa220: f9401fe0     	ldr	x0, [sp, #0x38]
+   aa224: b4fffee0     	cbz	x0, 0xaa200 <_ZnwmSt11align_val_t+0x40>
+   aa228: f94013f5     	ldr	x21, [sp, #0x20]
+   aa22c: a94153f3     	ldp	x19, x20, [sp, #0x10]
+   aa230: a8c47bfd     	ldp	x29, x30, [sp], #0x40
+   aa234: d50323bf     	autiasp
+   aa238: d65f03c0     	ret
+   aa23c: d2800100     	mov	x0, #0x8                // =8
+   aa240: 97ffcf08     	bl	0x9de60 <__cxa_allocate_exception@plt>
+   aa244: b0000da3     	adrp	x3, 0x25f000
+   aa248: f9428463     	ldr	x3, [x3, #0x508]
+   aa24c: b0000da2     	adrp	x2, 0x25f000
+   aa250: f946f842     	ldr	x2, [x2, #0xdf0]
+   aa254: 91004063     	add	x3, x3, #0x10
+   aa258: 90000da1     	adrp	x1, 0x25e000 <_ZTVSt10moneypunctIwLb1EE+0x8>
+   aa25c: f947b821     	ldr	x1, [x1, #0xf70]
+   aa260: f9000003     	str	x3, [x0]
+   aa264: 97ffd0e3     	bl	0x9e5f0 <__cxa_throw@plt>
+   aa268: d503201f     	nop
+   aa26c: d503201f     	nop
+   aa270: d503201f     	nop
+   aa274: d503201f     	nop
+   aa278: d503201f     	nop
+   aa27c: d503201f     	nop
