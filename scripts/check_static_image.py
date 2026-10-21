@@ -142,7 +142,7 @@ def check_filesystem(container, architecture):
     """Export a Docker-generated container ID and inspect its filesystem in memory."""
     with tempfile.TemporaryFile() as archive:
         # The container ID comes from Docker create; -- ends option parsing.
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit
+        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit, python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
         subprocess.run([DOCKER, "export", "--", container], stdout=archive, check=True, shell=False, timeout=120)  # nosec B603
         archive.seek(0)
         with tarfile.open(fileobj=archive) as filesystem:
