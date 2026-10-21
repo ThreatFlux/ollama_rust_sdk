@@ -5,20 +5,33 @@ import argparse
 import json
 from pathlib import PurePosixPath
 import struct
-import subprocess
+from shutil import which
+
+# Process calls below use argv lists, shell=False, and fixed tool names.
+import subprocess  # nosec B404
 import tarfile
 import tempfile
+
+
+DOCKER = which("docker")
+OPENSSL = which("openssl")
+if not DOCKER or not OPENSSL:
+    raise RuntimeError("Docker and OpenSSL must be installed on PATH")
 
 
 BINARIES = {"usr/local/bin/app", "usr/bin/tini"}
 
 
 def check_ca_trust(bundle):
-    encoded = subprocess.check_output(
-        ["openssl", "crl2pkcs7", "-nocrl", "-certfile", "/dev/stdin"], input=bundle
+    """Reject distrusted roots in the shipped PEM bundle using fixed OpenSSL commands."""
+    # Fixed commands consume certificate bytes on stdin, never as shell input.
+    # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit
+    encoded = subprocess.check_output(  # nosec B603
+        [OPENSSL, "crl2pkcs7", "-nocrl", "-certfile", "/dev/stdin"], input=bundle, shell=False, timeout=30
     )
-    subjects = subprocess.check_output(
-        ["openssl", "pkcs7", "-print_certs", "-noout"], input=encoded
+    # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit
+    subjects = subprocess.check_output(  # nosec B603
+        [OPENSSL, "pkcs7", "-print_certs", "-noout"], input=encoded, shell=False, timeout=30
     ).decode().lower()
     for distrusted in ("emsign ecc root ca - g3", "aaa certificate services"):
         if distrusted in subjects:
@@ -26,6 +39,7 @@ def check_ca_trust(bundle):
 
 
 def check_dynamic_section(name, data, header):
+    """Reject ELF dynamic sections that require shared libraries."""
     for entry in range(header[2], header[2] + header[5], 16):
         tag, _ = struct.unpack_from("<qQ", data, entry)
         if tag == 0:
@@ -35,6 +49,7 @@ def check_dynamic_section(name, data, header):
 
 
 def check_elf(name, data, architecture):
+    """Verify architecture, static linkage, and application PIE headers."""
     if data[:6] != b"\x7fELF\x02\x01":
         raise ValueError(f"{name}: expected a little-endian ELF64 executable")
     if name == "usr/local/bin/app" and struct.unpack_from("<H", data, 16)[0] != 3:
@@ -55,6 +70,7 @@ def check_elf(name, data, architecture):
 
 
 def check_configuration(info):
+    """Require the nonroot entrypoint and explicit certificate trust configuration."""
     config = info["Config"]
     if config["User"] != "65532:65532":
         raise ValueError("runtime must use the nonroot 65532:65532 account")
@@ -65,11 +81,13 @@ def check_configuration(info):
 
 
 def read_file(filesystem, files, name):
+    """Read one archive member without extracting files onto the host."""
     with filesystem.extractfile(files[name]) as source:
         return source.read()
 
 
 def check_runtime_files(filesystem, files, architecture):
+    """Allow only root-owned static runtime executables without shared libraries."""
     seen = set()
     for name, member in files.items():
         if member.mode & 0o6000:
@@ -91,6 +109,7 @@ def check_runtime_files(filesystem, files, architecture):
 
 
 def check_ca_package(status):
+    """Require an installed and updated CA supplier package record."""
     if "Package: ca-certificates\n" not in status or "Status: install ok installed\n" not in status:
         raise ValueError("missing installed CA supplier package record")
     version = next(
@@ -101,6 +120,7 @@ def check_ca_package(status):
 
 
 def check_support_files(filesystem, files, architecture):
+    """Verify certificate trust, package metadata, SBOM, and linker provenance."""
     bundle = read_file(filesystem, files, "etc/ssl/certs/ca-certificates.crt")
     if b"-----BEGIN CERTIFICATE-----" not in bundle:
         raise ValueError("missing CA certificates")
@@ -119,8 +139,11 @@ def check_support_files(filesystem, files, architecture):
 
 
 def check_filesystem(container, architecture):
+    """Export a Docker-generated container ID and inspect its filesystem in memory."""
     with tempfile.TemporaryFile() as archive:
-        subprocess.run(["docker", "export", container], stdout=archive, check=True)
+        # The container ID comes from Docker create; -- ends option parsing.
+        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit
+        subprocess.run([DOCKER, "export", "--", container], stdout=archive, check=True, shell=False, timeout=120)  # nosec B603
         archive.seek(0)
         with tarfile.open(fileobj=archive) as filesystem:
             files = {str(PurePosixPath(m.name)): m for m in filesystem if m.isfile()}
@@ -129,22 +152,28 @@ def check_filesystem(container, architecture):
 
 
 def main():
+    """Validate the selected image and remove the temporary container on completion."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("image")
     parser.add_argument("--platform", choices=("linux/amd64", "linux/arm64"))
     args = parser.parse_args()
-    create = ["docker", "create"]
+    # Image input follows --; all subsequent IDs are returned by Docker.
+    create = [DOCKER, "create"]
     if args.platform:
         create += ["--platform", args.platform]
-    container = subprocess.check_output(create + ["--", args.image], text=True).strip()
+    # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit, python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+    container = subprocess.check_output(create + ["--", args.image], text=True, shell=False, timeout=60).strip()  # nosec B603
     try:
-        info = json.loads(subprocess.check_output(["docker", "inspect", container]))[0]
-        image = json.loads(subprocess.check_output(["docker", "image", "inspect", info["Image"]]))[0]
+        # nosemgrep: python_exec_rule-subprocess-call, python_exec_rule-subprocess-call-array, python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit, python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+        info = json.loads(subprocess.check_output([DOCKER, "inspect", "--", container], shell=False, timeout=30))[0]  # nosec B603
+        # nosemgrep: python_exec_rule-subprocess-call-array, python_exec_rule-subprocess-call, python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit, python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+        image = json.loads(subprocess.check_output([DOCKER, "image", "inspect", "--", info["Image"]], shell=False, timeout=30))[0]  # nosec B603
         check_configuration(info)
         check_filesystem(container, image["Architecture"])
         print(f"Static runtime verified: {args.image} ({image['Architecture']})")
     finally:
-        subprocess.run(["docker", "rm", container], stdout=subprocess.DEVNULL, check=True)
+        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit, python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+        subprocess.run([DOCKER, "rm", "--", container], stdout=subprocess.DEVNULL, check=True, shell=False, timeout=30)  # nosec B603
 
 
 if __name__ == "__main__":
