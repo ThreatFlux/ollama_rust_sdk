@@ -54,6 +54,9 @@ RUN apk add --no-cache \
 
 FROM rust-base AS builder
 
+# Bound compilation parallelism on shared builders and emulated platforms.
+ENV CARGO_BUILD_JOBS=2
+
 RUN adduser -D -u 1000 builder
 USER builder
 WORKDIR /build
