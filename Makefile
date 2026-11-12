@@ -106,9 +106,9 @@ hooks-install: ## Install repository-owned hooks safely in any worktree
 
 dev-setup: hooks-install ## Install the pinned development tools used by CI
 	@rustup component add --toolchain $(RUST_TOOLCHAIN) rustfmt clippy llvm-tools-preview
-	@cargo install cargo-audit --locked --version 0.22.2
+	@cargo install cargo-audit --locked --version 0.23.0
 	@cargo install cargo-deny --locked --version 0.20.2
-	@cargo install cargo-hack --locked --version 0.6.45
+	@cargo install cargo-hack --locked --version 0.6.46
 	@cargo install cargo-llvm-cov --locked --version 0.9.1
 
 setup-dev: dev-setup ## (Deprecated) Use `make dev-setup` instead
