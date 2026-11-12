@@ -42,7 +42,7 @@ futures-util = "0.3.34"
 # CLI support
 clap = { version = "4.6.7", features = ["derive"] }
 env_logger = "0.11.11"
-log = "0.4.34"
+log = "0.4.35"
 
 # Additional dependencies for examples
 chrono = { version = "0.4.45", features = ["serde"] }
@@ -61,7 +61,7 @@ mockall = "0.15.0"
 rstest = "0.28.0"
 assert-json-diff = "2.0.2"
 pretty_assertions = "1.4.1"
-uuid = { version = "1.28.0", features = ["serde", "v4"] }
+uuid = { version = "1.29.2", features = ["serde", "v4"] }
 
 [features]
 default = ["tls"]
