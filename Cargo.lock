@@ -1087,7 +1087,7 @@ dependencies = [
 
 [[package]]
 name = "ollama_rust_sdk"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "assert-json-diff",
  "chrono",
