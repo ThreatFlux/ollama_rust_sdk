@@ -419,7 +419,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             .id
                             .clone()
                             .unwrap_or_else(|| format!("call_{}", uuid::Uuid::new_v4()));
-                        conversation.push(ChatMessage::tool(result.clone(), tool_id));
+                        conversation.push(ChatMessage::tool(result, tool_id));
                     }
 
                     // Get final response with tool results
