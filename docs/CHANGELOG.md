@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Replace chrono with maintained Jiff 1.0.1 for model modification, model expiry,
+  health timestamps and timestamp examples. These public Rust fields now use
+  `ollama_rust_sdk::Timestamp`; callers constructing them must migrate from
+  `chrono::DateTime<Utc>`. This requires the next minor release, not a patch.
+  API JSON retains RFC 3339 UTC instants, nanosecond precision and optional values.
+  No exception is added for RUSTSEC-2026-0543.
+
 ### Fixed
 
 - `release.yml` writes the Windows archive's `.sha256` file with an LF line ending, like the Unix

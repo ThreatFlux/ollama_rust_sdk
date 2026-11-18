@@ -1,6 +1,6 @@
 //! Model information and management structures
 
-use chrono::{DateTime, Utc};
+use jiff::Timestamp;
 use serde::{Deserialize, Serialize};
 
 /// Information about a single model
@@ -17,7 +17,7 @@ pub struct Model {
 
     /// When the model was last modified
     #[serde(default)]
-    pub modified_at: Option<DateTime<Utc>>,
+    pub modified_at: Option<Timestamp>,
 
     /// Model details
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -105,7 +105,7 @@ pub struct RunningModel {
 
     /// When the model expires from memory
     #[serde(default)]
-    pub expires_at: Option<DateTime<Utc>>,
+    pub expires_at: Option<Timestamp>,
 
     /// Size in memory
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -266,9 +266,9 @@ impl RunningModel {
     pub fn expires_soon(&self) -> bool {
         match self.expires_at {
             Some(expires_at) => {
-                let now = Utc::now();
-                let time_until_expiry = expires_at.signed_duration_since(now);
-                time_until_expiry.num_minutes() <= 1
+                let now = Timestamp::now();
+                let time_until_expiry = expires_at - now;
+                time_until_expiry.as_secs() / 60 <= 1
             }
             None => false,
         }

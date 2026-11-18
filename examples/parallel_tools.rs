@@ -33,7 +33,7 @@ async fn fetch_data(source: &str, query: &str) -> serde_json::Value {
                 "endpoint": query,
                 "data": {
                     "status": "success",
-                    "timestamp": chrono::Utc::now().to_rfc3339(),
+                    "timestamp": ollama_rust_sdk::Timestamp::now().to_string(),
                     "values": [42, 84, 126]
                 },
                 "latency_ms": 245
