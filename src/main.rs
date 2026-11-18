@@ -223,7 +223,7 @@ async fn handle_model_commands(
             for model in models.models {
                 println!("  {} ({})", model.name, model.size);
                 if let Some(modified) = model.modified_at {
-                    println!("    Modified: {}", modified.format("%Y-%m-%d %H:%M:%S"));
+                    println!("    Modified: {}", modified.strftime("%Y-%m-%d %H:%M:%S"));
                 }
             }
         }

@@ -67,7 +67,7 @@ fn get_stock_price(symbol: &str) -> serde_json::Value {
         "change": change,
         "change_percent": format!("{:.2}%", change),
         "direction": direction,
-        "timestamp": chrono::Utc::now().to_rfc3339()
+        "timestamp": ollama_rust_sdk::Timestamp::now().to_string()
     })
 }
 

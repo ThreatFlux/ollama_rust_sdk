@@ -54,6 +54,8 @@ pub mod utils;
 pub use client::OllamaClient;
 pub use config::{ClientConfig, ClientConfigBuilder};
 pub use error::{OllamaError, Result};
+/// UTC API timestamp with RFC 3339 JSON serialization.
+pub use jiff::Timestamp;
 
 // Re-export commonly used types
 pub use models::{

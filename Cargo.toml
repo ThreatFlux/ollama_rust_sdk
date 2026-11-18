@@ -44,8 +44,8 @@ clap = { version = "4.6.7", features = ["derive"] }
 env_logger = "0.11.11"
 log = "0.4.35"
 
-# Additional dependencies for examples
-chrono = { version = "0.4.45", features = ["serde"] }
+# UTC timestamps shared by the API models and examples.
+jiff = { version = "1.0.1", features = ["serde"] }
 
 # Optional: TLS support
 rustls = { version = "0.23.46", optional = true }

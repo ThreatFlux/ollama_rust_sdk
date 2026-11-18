@@ -65,7 +65,7 @@ pub struct HealthStatus {
     /// Service status
     pub status: String,
     /// Timestamp of the check
-    pub timestamp: Option<chrono::DateTime<chrono::Utc>>,
+    pub timestamp: Option<jiff::Timestamp>,
     /// Additional health information
     pub details: Option<HashMap<String, serde_json::Value>>,
 }
