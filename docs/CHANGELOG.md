@@ -13,7 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   health timestamps and timestamp examples. These public Rust fields now use
   `ollama_rust_sdk::Timestamp`; callers constructing them must migrate from
   `chrono::DateTime<Utc>`. This requires the next minor release, not a patch.
-  API JSON retains RFC 3339 UTC instants, nanosecond precision and optional values.
+  API JSON retains ordinary RFC 3339 UTC instants, nanosecond precision and optional values.
+  Jiff uses the Unix timescale and does not represent leap seconds: an input
+  second of `60` is normalized to `59`, preserving its fractional digits. For
+  example, `2016-12-31T23:59:60.123456789Z` becomes
+  `2016-12-31T23:59:59.123456789Z`. This is an intentional parsing change from
+  chrono and is covered at the public JSON model boundary.
   No exception is added for RUSTSEC-2026-0543.
 
 ### Fixed
