@@ -62,7 +62,7 @@ heading when there are none) and leaves any other notes alone.
 
 | Credential | Holder | Purpose |
 |------------|--------|---------|
-| `threatflux-automation` GitHub App (org variable `TF_AUTOMATION_APP_ID`, org secret `TF_AUTOMATION_APP_PRIVATE_KEY`) | `auto-release.yml` and `dependencies.yml` | Release commit and tag pushed so they trigger `release.yml`/`docker.yml`; weekly dependency PRs whose CI starts without approval |
+| `threatflux-automation` GitHub App (org variable `TF_AUTOMATION_APP_ID`, org secret `TF_AUTOMATION_APP_PRIVATE_KEY`) | `auto-release.yml` and `dependencies.yml` | Release commit and tag pushed so they trigger `release.yml`/`docker.yml`; manually dispatched Cargo lockfile PRs whose CI starts without workflow approval |
 | `GITHUB_TOKEN` | Automatic | Release tag (manual dispatch), GitHub Release and assets |
 | GitHub OIDC (`id-token: write`) | `publish` job in the `crates-io` environment | Short-lived crates.io token |
 

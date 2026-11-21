@@ -1,8 +1,7 @@
 name: Dependencies
 
 on:
-  schedule:
-    - cron: '0 3 * * 1'
+  # Nightly version updates are grouped in dependabot.yml.
   workflow_dispatch:
 
 permissions:
@@ -109,9 +108,9 @@ jobs:
           token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
           add-paths: Cargo.lock
           commit-message: "chore(deps): update dependencies"
-          title: "chore(deps): weekly dependency updates"
+          title: "chore(deps): refresh Cargo lockfile"
           body: |
-            ## Weekly Dependency Updates
+            ## Cargo Lockfile Refresh
 
             This PR contains the latest dependency updates.
 
