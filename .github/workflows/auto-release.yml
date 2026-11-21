@@ -45,6 +45,7 @@ jobs:
       bump: ${{ github.event.inputs.version_bump || 'auto' }}
       # Only workflow_dispatch can request a dry run; workflow_run releases are real.
       dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run == true }}
+      create-pr: true
       required-workflows: ci.yml,security.yml
       # The threatflux-automation GitHub App cuts the release, so its tag push
       # is an ordinary push that starts release.yml (v*.*.*) and docker.yml (v*)

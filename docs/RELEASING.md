@@ -6,16 +6,18 @@ Releases are driven by [Conventional Commits](https://www.conventionalcommits.or
 
 1. Analyzes commits since the last tag.
 2. Determines the version bump (patch / minor / major) from commit prefixes.
-3. Commits the version bump and pushes a new Git tag (`v*`) as the `threatflux-automation`
-   GitHub App.
-4. The tag push triggers `release.yml`, which builds, packages, publishes, and creates the GitHub
+3. Opens or updates the release proposal as the `threatflux-automation` GitHub App. A code owner
+   reviews it before merge. Squash merge the proposal with its `chore: release vX.Y.Z` title so
+   the Docker workflow skips the branch build and builds the release from its tag.
+4. After CI and Security pass on the merged `main` commit, the App tags that commit. The tag
+   triggers `release.yml`, which builds, packages, publishes, and creates the GitHub
    Release, and `docker.yml`, which publishes the container image. Each runs once per tag: the
    reusable workflow (`ThreatFlux/github_actions` `reusable-auto-release.yml`) does not dispatch
    them again when the App pushed the tag. It only dispatches them if the release falls back to
    `GITHUB_TOKEN`, whose tag push starts no workflows. The release commit's push to `main` runs
    CI as usual, but `docker.yml` skips its branch build: the tag run builds that commit.
 
-**No manual steps are required for routine releases.**
+Routine releases require owner review and merge of the proposal.
 
 ## Manual Release
 
@@ -29,15 +31,17 @@ Use this when the automated flow is insufficient (e.g., pre-release versions, ho
    ```
 2. Update `docs/CHANGELOG.md` - move items from `[Unreleased]` to a new version header.
 3. Bump the version in `Cargo.toml`.
-4. Commit:
+4. Commit on a release branch and open a pull request to `main`. Obtain code-owner approval and
+   merge through the standard review process.
    ```bash
    git add Cargo.toml docs/CHANGELOG.md
    git commit -m "chore: release v1.2.3"
    ```
-5. Tag:
+5. Verify CI and Security on the merged `main` commit. If automatic release does not cover the
+   intended version, create the tag on that verified commit and push only the tag.
    ```bash
-   git tag v1.2.3
-   git push origin main --tags
+   git tag v1.2.3 <verified-main-sha>
+   git push origin refs/tags/v1.2.3
    ```
 
 ### What Happens Next
@@ -62,7 +66,7 @@ heading when there are none) and leaves any other notes alone.
 
 | Credential | Holder | Purpose |
 |------------|--------|---------|
-| `threatflux-automation` GitHub App (org variable `TF_AUTOMATION_APP_ID`, org secret `TF_AUTOMATION_APP_PRIVATE_KEY`) | `auto-release.yml` and `dependencies.yml` | Release commit and tag pushed so they trigger `release.yml`/`docker.yml`; weekly dependency PRs whose CI starts without approval |
+| `threatflux-automation` GitHub App (org variable `TF_AUTOMATION_APP_ID`, org secret `TF_AUTOMATION_APP_PRIVATE_KEY`) | `auto-release.yml` and `dependencies.yml` | Opens release proposals and manually dispatched Cargo lockfile PRs. Pushes reviewed release tags to trigger `release.yml` and `docker.yml`. |
 | `GITHUB_TOKEN` | Automatic | Release tag (manual dispatch), GitHub Release and assets |
 | GitHub OIDC (`id-token: write`) | `publish` job in the `crates-io` environment | Short-lived crates.io token |
 
@@ -79,8 +83,7 @@ Both release workflows can be rehearsed from `main` without tagging, releasing o
 
 ```bash
 # Report the version auto-release would cut; no commit, tag, release or dispatch.
-# Once the CI and Security gate passes it still mints the GitHub App token, so it
-# also checks the App configuration.
+# The preview uses read-only credentials and does not mint a GitHub App token.
 gh workflow run auto-release.yml -f version_bump=auto -f dry_run=true
 
 # Build and package every target and run `cargo publish --dry-run --locked`
