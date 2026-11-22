@@ -6,9 +6,9 @@ Releases are driven by [Conventional Commits](https://www.conventionalcommits.or
 
 1. Analyzes commits since the last tag.
 2. Determines the version bump (patch / minor / major) from commit prefixes.
-3. Opens or updates the release proposal as the `threatflux-automation` GitHub App. A code owner
-   reviews it before merge. Squash merge the proposal with its `chore: release vX.Y.Z` title so
-   the Docker workflow skips the branch build and builds the release from its tag.
+3. Opens or updates the `chore(release): vX.Y.Z` proposal as the `threatflux-automation` GitHub
+   App. After code-owner approval, squash merge it with the commit subject
+   `chore: release vX.Y.Z` so Docker builds the release from its tag once.
 4. After CI and Security pass on the merged `main` commit, the App tags that commit. The tag
    triggers `release.yml`, which builds, packages, publishes, and creates the GitHub
    Release, and `docker.yml`, which publishes the container image. Each runs once per tag: the
@@ -19,9 +19,11 @@ Releases are driven by [Conventional Commits](https://www.conventionalcommits.or
 
 Routine releases require owner review and merge of the proposal.
 The automatic tag applies only to the merged release proposal commit. If `main` advances
-before that commit qualifies, review an updated release on current `main` that accounts for
-the new changes and their required version. The workflow refuses to tag a later commit with
-the earlier proposal's version.
+before it qualifies, open a replacement PR from current `main`. Put the version and lockfile
+bump in one commit whose only parent is that `main` commit. Title the PR
+`chore(release): vX.Y.Z` with the version in `Cargo.toml`. Account for the new changes when
+choosing the version, obtain fresh owner approval, and squash merge before `main` advances.
+For manual tagging, follow the [Manual Release](#manual-release) steps.
 
 ## Manual Release
 

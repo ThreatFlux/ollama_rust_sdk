@@ -46,12 +46,13 @@ def package_version(repo_path, commit):
 
 def find_proposal(pull_requests, repository, candidate, version):
     """Return the reviewed proposal head associated with this merge commit."""
+    release_titles = {f"chore(release): v{version}", f"chore: release v{version}"}
     for pr in pull_requests:
         if (
             pr["merged_at"]
             and pr["merge_commit_sha"] == candidate
             and pr["base"]["ref"] == "main"
-            and pr["title"] == f"chore: release v{version}"
+            and pr["title"] in release_titles
             and (pr["head"]["repo"] or {}).get("full_name") == repository
         ):
             return pr["head"]["sha"]
