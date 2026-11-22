@@ -35,7 +35,37 @@ permissions:
   pull-requests: read
 
 jobs:
+  release-candidate:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.dry_run != true) ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.id == github.event.repository.id)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Check out the release policy
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Run the policy from the trusted revision that defines this workflow.
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - name: Verify proposal and candidate match
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_CANDIDATE: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: python3 scripts/check_release_candidate.py
+
   release:
+    needs: release-candidate
+    if: >-
+      !cancelled() &&
+      (needs.release-candidate.result == 'success' ||
+       (github.event_name == 'workflow_dispatch' && inputs.dry_run == true))
     permissions:
       actions: write
       contents: write
@@ -45,6 +75,7 @@ jobs:
       bump: ${{ github.event.inputs.version_bump || 'auto' }}
       # Only workflow_dispatch can request a dry run; workflow_run releases are real.
       dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run == true }}
+      create-pr: true
       required-workflows: ci.yml,security.yml
       # The threatflux-automation GitHub App cuts the release, so its tag push
       # is an ordinary push that starts release.yml (v*.*.*) and docker.yml (v*)
