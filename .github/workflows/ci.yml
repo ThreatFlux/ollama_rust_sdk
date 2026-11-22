@@ -6,11 +6,7 @@ permissions:
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "LICENSE"
-      - ".gitignore"
-      - "docs/**"
+    # Auto Release requires a successful CI push run on the exact main SHA.
   pull_request:
     branches: [main]
     paths-ignore:
@@ -59,6 +55,9 @@ jobs:
 
       - name: Check container publication ordering
         run: python3 -m unittest discover -s scripts -p test_container_publish_policy.py
+
+      - name: Check release candidate binding
+        run: python3 -m unittest discover -s scripts -p test_release_candidate.py
 
       - name: Check formatting
         run: cargo fmt --all -- --check

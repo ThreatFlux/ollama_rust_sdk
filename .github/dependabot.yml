@@ -14,6 +14,8 @@ updates:
     directory: /
     patterns: ["*"]
     multi-ecosystem-group: nightly-dependencies
+    allow:
+      - dependency-type: all
     labels:
       - dependencies
       - rust

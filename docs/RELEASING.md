@@ -18,6 +18,10 @@ Releases are driven by [Conventional Commits](https://www.conventionalcommits.or
    CI as usual, but `docker.yml` skips its branch build: the tag run builds that commit.
 
 Routine releases require owner review and merge of the proposal.
+The automatic tag applies only to the merged release proposal commit. If `main` advances
+before that commit qualifies, review an updated release on current `main` that accounts for
+the new changes and their required version. The workflow refuses to tag a later commit with
+the earlier proposal's version.
 
 ## Manual Release
 
@@ -30,11 +34,12 @@ Use this when the automated flow is insufficient (e.g., pre-release versions, ho
    make ci-local
    ```
 2. Update `docs/CHANGELOG.md` - move items from `[Unreleased]` to a new version header.
-3. Bump the version in `Cargo.toml`.
+3. Bump the version in `Cargo.toml` and refresh its package entry in `Cargo.lock`.
 4. Commit on a release branch and open a pull request to `main`. Obtain code-owner approval and
    merge through the standard review process.
    ```bash
-   git add Cargo.toml docs/CHANGELOG.md
+   cargo update -p ollama_rust_sdk
+   git add Cargo.toml Cargo.lock docs/CHANGELOG.md
    git commit -m "chore: release v1.2.3"
    ```
 5. Verify CI and Security on the merged `main` commit. If automatic release does not cover the
