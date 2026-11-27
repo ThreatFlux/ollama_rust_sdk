@@ -60,7 +60,15 @@ def find_proposal(pull_requests, repository, candidate, version):
 
 
 def check_proposal_base(pr_head, proposal_parents, candidate_base):
-    if [parent["sha"] for parent in proposal_parents] != [candidate_base]:
+    """Accept a first proposal [base] or a refreshed proposal [base, previous].
+
+    Since github_actions v0.7.15 the release runtime keeps the previous proposal
+    as a second parent when it refreshes automation/release, so the branch update
+    is a fast-forward. The tree is still built from the tested base alone.
+    """
+    parents = [parent["sha"] for parent in proposal_parents]
+    refreshed = len(parents) == 2 and parents[1] != candidate_base
+    if not parents or parents[0] != candidate_base or not (len(parents) == 1 or refreshed):
         raise ValueError(f"Release proposal {pr_head} was not prepared from {candidate_base}")
 
 

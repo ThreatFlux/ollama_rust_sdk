@@ -51,6 +51,54 @@ class ReleaseCandidateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "was not prepared from"):
             check_proposal_base("proposal", [{"sha": "reviewed-base"}], "later-feature")
 
+    def test_refreshed_proposal_can_be_tagged(self):
+        # v0.7.15 refreshes keep the previous proposal as a second parent.
+        check_proposal_base(
+            "proposal",
+            [{"sha": "reviewed-base"}, {"sha": "previous-proposal"}],
+            "reviewed-base",
+        )
+
+    def test_refreshed_proposal_on_stale_base_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "was not prepared from"):
+            check_proposal_base(
+                "proposal",
+                [{"sha": "stale-base"}, {"sha": "reviewed-base"}],
+                "reviewed-base",
+            )
+
+    def test_refreshed_proposal_with_extra_parents_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "was not prepared from"):
+            check_proposal_base(
+                "proposal",
+                [{"sha": "reviewed-base"}, {"sha": "previous-proposal"}, {"sha": "other"}],
+                "reviewed-base",
+            )
+
+    def test_refreshed_proposal_repeating_the_base_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "was not prepared from"):
+            check_proposal_base(
+                "proposal",
+                [{"sha": "reviewed-base"}, {"sha": "reviewed-base"}],
+                "reviewed-base",
+            )
+
+    def test_proposal_without_parents_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "was not prepared from"):
+            check_proposal_base("proposal", [], "reviewed-base")
+
+    def test_untagged_refreshed_candidate_can_be_tagged(self):
+        proposal = copy.deepcopy(self.proposal)
+        proposal["merge_commit_sha"] = self.candidate
+        refreshed = {"parents": [{"sha": "reviewed-base"}, {"sha": "previous-proposal"}]}
+        squashed = {"parents": [{"sha": "reviewed-base"}]}
+        with (
+            mock.patch("check_release_candidate.package_version", side_effect=["1.2.4", "1.2.3"]),
+            mock.patch("check_release_candidate.github_api", side_effect=[[], refreshed, squashed]),
+            mock.patch("check_release_candidate.associated_pull_requests", return_value=[proposal]),
+        ):
+            main()
+
     def test_release_like_title_cannot_authorize_carried_forward_version(self):
         proposal = copy.deepcopy(self.proposal)
         proposal["merge_commit_sha"] = self.candidate
