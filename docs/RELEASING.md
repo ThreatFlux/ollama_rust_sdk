@@ -23,6 +23,9 @@ before it qualifies, open a replacement PR from current `main`. Put the version 
 bump in one commit whose only parent is that `main` commit. Title the PR
 `chore(release): vX.Y.Z` with the version in `Cargo.toml`. Account for the new changes when
 choosing the version, obtain fresh owner approval, and squash merge before `main` advances.
+When automation refreshes an open proposal, its commit has a second parent, the previous
+proposal, so the branch update is a fast-forward. The tag check accepts that refreshed commit
+when its first parent is the `main` commit it was built from.
 For manual tagging, follow the [Manual Release](#manual-release) steps.
 
 ## Manual Release
